@@ -1,0 +1,25 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "bento/ubuntu-22.04-arm64"
+
+  config.vm.network "private_network", ip: "192.168.10.10"
+
+  config.vm.provider "vmware_desktop" do |v|
+    v.gui = false
+    v.vmx['displayname'] = 'docker-vm'
+    v.memory = 4096
+    v.cpus = 2
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+    #!/bin/bash
+    sudo apt-get update
+    sudo apt-get install -y docker.io docker-compose
+    sudo usermod -aG docker vagrant
+    sudo apt install make
+  SHELL
+
+end

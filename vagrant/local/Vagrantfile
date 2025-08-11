@@ -1,0 +1,43 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  # DB server
+  config.vm.define "db" do |db|
+    db.vm.box = "bento/ubuntu-22.04-arm64"
+    db.vm.hostname = "db"
+    db.vm.network "private_network", ip: "192.168.56.11"
+
+    db.vm.provider "vmware_desktop" do |v|
+      v.memory = 2048
+      v.cpus = 2
+    end
+  end
+
+  # Backend server
+  config.vm.define "backend" do |backend|
+    backend.vm.box = "bento/ubuntu-22.04-arm64"
+    backend.vm.hostname = "backend"
+    backend.vm.network "private_network", ip: "192.168.56.12"
+
+    backend.vm.provider "vmware_desktop" do |v|
+      v.memory = 2048
+      v.cpus = 2
+    end
+  end
+
+  # Frontend server
+  config.vm.define "frontend" do |frontend|
+    frontend.vm.box = "bento/ubuntu-22.04-arm64"
+    frontend.vm.hostname = "frontend"
+    frontend.vm.network "private_network", ip: "192.168.56.13"
+
+    frontend.vm.provider "vmware_desktop" do |v|
+      v.memory = 2048
+      v.cpus = 2
+    end
+  end
+
+end
+

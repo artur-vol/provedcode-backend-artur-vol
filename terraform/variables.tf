@@ -5,7 +5,7 @@
 variable "region" {
   description = "AWS region where resources will be created"
   type        = string
-  default     = "eu-central-1" 
+  default     = "eu-central-1"
 }
 
 # VPC
@@ -52,7 +52,6 @@ variable "public_subnet_name" {
 
 # Private Subnets
 
-
 variable "private_subnet_az_1" {
   description = "Availability Zone for the first private subnet"
   type        = string
@@ -77,7 +76,6 @@ variable "private_subnet_cidr_block_2" {
   default     = "10.0.3.0/24"
 }
 
-
 variable "private_subnet_name" {
   description = "Name tag for the private subnet"
   type        = string
@@ -97,4 +95,84 @@ variable "private_route_table_name" {
   default     = "private_route_table"
 }
 
+# EC2 Frontend
+
+variable "frontend_instance_name" {
+  description = "Name tag for the frontend EC2 instance"
+  type        = string
+  default     = "frontend"
+}
+
+variable "instance_type" {
+  description = "EC2 instance type"
+  type        = string
+  default     = "t3.micro"
+}
+
+# EC2 Backend
+variable "backend_instance_name" {
+  description = "Name tag for the EC2 instance"
+  type        = string
+  default     = "backend"
+}
+
+
+# AMI
+
+variable "ami_name_filter" {
+  description = "AMI name filter pattern"
+  type        = string
+  default     = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
+}
+
+variable "virtualization_type" {
+  description = "Virtualization type filter for AMI"
+  type        = string
+  default     = "hvm"
+}
+
+variable "ami_owner" {
+  description = "Owner ID of the AMI"
+  type        = string
+  default     = "099720109477" # Canonicals
+}
+
+# Security Groups
+
+variable "frontend_sg_name" {
+  description = "The name of the frontend Security Group"
+  type        = string
+  default     = "frontend-sg"
+}
+
+variable "allowed_http_cidrs" {
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+  description = "List of CIDR blocks allowed for HTTP traffic (port 80)"
+}
+
+variable "allowed_https_cidrs" {
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+  description = "List of CIDR blocks allowed for HTTPS traffic (port 443)"
+}
+
+variable "allowed_ssh_cidrs" {
+  type        = list(string)
+  default     = ["178.212.243.25/32"]
+  description = "List of CIDR blocks allowed for SSH access (port 22)"
+}
+
+variable "backend_sg_name" {
+  type        = string
+  default     = "backend_sg"
+  description = "Name of the Security Group for backend servers"
+}
+
+# Access Key
+variable "key_pair_name" {
+  type        = string
+  default     = "deployer-key"
+  description = "Name of the SSH key pair for instance access"
+}
 

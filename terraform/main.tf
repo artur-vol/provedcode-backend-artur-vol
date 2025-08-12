@@ -8,6 +8,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 6.7.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5.1"
+    }
   }
 }
 
@@ -224,8 +228,8 @@ resource "aws_security_group_rule" "frontend_egress_all" {
 
 # EC2 Backend
 resource "aws_instance" "backend" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = var.instance_type
+  ami                    = data.aws_ami.ubuntu.id
+  instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.backend.id]
   subnet_id              = aws_subnet.private_1.id
   key_name               = aws_key_pair.deployer.key_name
@@ -250,12 +254,12 @@ resource "aws_security_group" "backend" {
 
 # Allow access from frontend SG
 resource "aws_security_group_rule" "backend_from_frontend" {
-  type              = "ingress"
-  from_port         = 8080
-  to_port           = 8080
-  protocol          = "tcp"
-  security_group_id = aws_security_group.backend.id
-  description       = "Allow backend access from frontend SG"
+  type                     = "ingress"
+  from_port                = 8080
+  to_port                  = 8080
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.backend.id
+  description              = "Allow backend access from frontend SG"
   source_security_group_id = aws_security_group.frontend.id
 }
 
@@ -292,3 +296,85 @@ resource "aws_key_pair" "deployer" {
   public_key = tls_private_key.ssh_key.public_key_openssh
 }
 
+
+# =======================
+# ======= STORAGE =======
+# =======================
+
+
+# Random Values Generator
+resource "random_id" "this" {
+  byte_length = 8
+}
+
+# S3 Bucket
+resource "aws_s3_bucket" "this" {
+  bucket = "${var.s3_bucket_name}-${random_id.this.hex}"
+
+  force_destroy = true
+
+}
+
+# Block public access
+resource "aws_s3_bucket_public_access_block" "this" {
+  bucket = aws_s3_bucket.this.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# IAM User with S3 Bucket access
+resource "aws_iam_user" "this" {
+  name = var.user_name
+}
+
+
+# Credentials for IAM User
+resource "aws_iam_access_key" "this" {
+  user = aws_iam_user.this.name
+}
+
+resource "aws_iam_policy" "this" {
+  name = var.policy_name
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid    = "Statement1",
+        Effect = "Allow",
+        Action = [
+          "s3:GetObject",
+          "s3:DeleteObject",
+          "s3:PutObject"
+        ],
+        Resource = "${aws_s3_bucket.this.arn}/*"
+      }
+    ]
+  })
+}
+
+# Policy and IAM User Association
+resource "aws_iam_user_policy_attachment" "this" {
+  user       = aws_iam_user.this.name
+  policy_arn = aws_iam_policy.this.arn
+}
+
+# S3 Bucket User Secret Key
+resource "aws_ssm_parameter" "secret_key" {
+  name        = var.ssm_secret_key_name
+  description = var.ssm_secret_key_description
+  type        = "SecureString"
+  value       = aws_iam_access_key.this.secret
+  tier        = "Standard"
+}
+
+# S3 Bucket User Access Key
+resource "aws_ssm_parameter" "access_key" {
+  name        = var.ssm_access_key_name
+  description = var.ssm_access_key_description
+  type        = "SecureString"
+  value       = aws_iam_access_key.this.id
+  tier        = "Standard"
+}

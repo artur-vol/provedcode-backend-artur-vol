@@ -176,3 +176,51 @@ variable "key_pair_name" {
   description = "Name of the SSH key pair for instance access"
 }
 
+# S3 Bucket
+variable "s3_bucket_name" {
+  description = "Name tag for the S3 Bucket (should be unique)"
+  type        = string
+  default     = "provedcode-s3-bucket"
+}
+
+# IAM User
+variable "user_name" {
+  description = "Name tag for the backend user"
+  type        = string
+  default     = "backend_s3_user"
+}
+
+# IAM Policy
+variable "policy_name" {
+  description = "Name tag for the IAM Policy"
+  type        = string
+  default     = "s3_bucket_access"
+}
+
+# SSM Parameters
+variable "ssm_secret_key_name" {
+  description = "Name for the SSM parameter storing the secret access key"
+  type        = string
+  default     = "/myapp/s3/secret_access_key"
+}
+
+variable "ssm_secret_key_description" {
+  description = "Description for the SSM parameter storing the secret access key"
+  type        = string
+  default     = "Provide an access to the S3 Bucket"
+}
+
+variable "ssm_access_key_name" {
+  description = "Name for the SSM parameter storing the access key id"
+  type        = string
+  default     = "/myapp/s3/access_key_id"
+}
+
+variable "ssm_access_key_description" {
+  description = "Description for the SSM parameter storing the access key id"
+  type        = string
+  default     = "Provide an access to the S3 Bucket"
+}
+
+
+

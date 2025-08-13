@@ -177,10 +177,18 @@ variable "backend_sg_name" {
 }
 
 # Access Key
-variable "key_pair_name" {
+variable "backend_key_pair_name" {
   type        = string
-  default     = "deployer-key"
-  description = "Name of the SSH key pair for instance access"
+  default     = "backend"
+  description = "Name of the SSH key pair for the backend instance access"
+}
+
+
+# Access Key
+variable "frontend_key_pair_name" {
+  type        = string
+  default     = "frontend"
+  description = "Name of the SSH key pair for the frontend instance access"
 }
 
 # S3 Bucket
@@ -242,6 +250,13 @@ variable "edge_gateway_sg_name" {
   description = "The name of the edge-gateway Security Group"
   type        = string
   default     = "edge-gateway-sg"
+}
+
+# Access Key
+variable "edge_gateway_key_pair_name" {
+  type        = string
+  default     = "edge-gateway-key"
+  description = "Name of the SSH key pair for the bastion instance access"
 }
 
 

@@ -157,7 +157,7 @@ resource "aws_instance" "frontend" {
 
   vpc_security_group_ids = [aws_security_group.frontend.id]
   subnet_id              = aws_subnet.private_1.id
-  key_name               = aws_key_pair.deployer.key_name
+  key_name               = aws_key_pair.frontend.key_name
 
   tags = {
     Name = var.frontend_instance_name
@@ -238,13 +238,25 @@ resource "aws_security_group_rule" "frontend_egress_all" {
   security_group_id = aws_security_group.frontend.id
 }
 
+# SSH Key
+resource "tls_private_key" "frontend" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "aws_key_pair" "frontend" {
+  key_name   = var.frontend_key_pair_name
+  public_key = tls_private_key.frontend.public_key_openssh
+}
+
+
 # EC2 Backend
 resource "aws_instance" "backend" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.backend.id]
   subnet_id              = aws_subnet.private_1.id
-  key_name               = aws_key_pair.deployer.key_name
+  key_name               = aws_key_pair.backend.key_name
 
   tags = {
     Name = var.backend_instance_name
@@ -298,14 +310,14 @@ resource "aws_security_group_rule" "backend_egress" {
 }
 
 # SSH Key
-resource "tls_private_key" "ssh_key" {
+resource "tls_private_key" "backend" {
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
-resource "aws_key_pair" "deployer" {
-  key_name   = var.key_pair_name
-  public_key = tls_private_key.ssh_key.public_key_openssh
+resource "aws_key_pair" "backend" {
+  key_name   = var.backend_key_pair_name
+  public_key = tls_private_key.backend.public_key_openssh
 }
 
 
@@ -398,7 +410,7 @@ resource "aws_instance" "edge_gateway" {
 
   vpc_security_group_ids = [aws_security_group.edge_gateway.id]
   subnet_id              = aws_subnet.public.id
-  key_name               = aws_key_pair.deployer.key_name
+  key_name               = aws_key_pair.edge_gateway.key_name
 
   tags = {
     Name = var.edge_gateway_instance_name
@@ -460,6 +472,17 @@ resource "aws_security_group_rule" "edge_gateway_egress_all" {
   cidr_blocks       = ["0.0.0.0/0"]
   description       = "Allow all outbound traffic"
   security_group_id = aws_security_group.edge_gateway.id
+}
+
+# SSH Key
+resource "tls_private_key" "edge_gateway" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "aws_key_pair" "edge_gateway" {
+  key_name   = var.edge_gateway_key_pair_name
+  public_key = tls_private_key.edge_gateway.public_key_openssh
 }
 
 

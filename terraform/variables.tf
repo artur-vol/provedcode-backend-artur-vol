@@ -230,4 +230,18 @@ variable "ssm_access_key_description" {
 }
 
 
+# Edge-Gateway
+
+variable "edge_gateway_instance_name" {
+  description = "Name for the instance that serves as both a bastion host and a reverse proxy"
+  type        = string
+  default     = "edge-gateway"
+}
+
+variable "edge_gateway_sg_name" {
+  description = "The name of the edge-gateway Security Group"
+  type        = string
+  default     = "edge-gateway-sg"
+}
+
 

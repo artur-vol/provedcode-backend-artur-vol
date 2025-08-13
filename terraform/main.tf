@@ -239,16 +239,11 @@ resource "aws_security_group_rule" "frontend_egress_all" {
 }
 
 # SSH Key
-resource "tls_private_key" "frontend" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
 
 resource "aws_key_pair" "frontend" {
   key_name   = var.frontend_key_pair_name
-  public_key = tls_private_key.frontend.public_key_openssh
+  public_key = file(var.frontend_public_key_path)
 }
-
 
 # EC2 Backend
 resource "aws_instance" "backend" {
@@ -310,14 +305,10 @@ resource "aws_security_group_rule" "backend_egress" {
 }
 
 # SSH Key
-resource "tls_private_key" "backend" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
 
 resource "aws_key_pair" "backend" {
   key_name   = var.backend_key_pair_name
-  public_key = tls_private_key.backend.public_key_openssh
+  public_key = file(var.backend_public_key_path)
 }
 
 
@@ -475,14 +466,10 @@ resource "aws_security_group_rule" "edge_gateway_egress_all" {
 }
 
 # SSH Key
-resource "tls_private_key" "edge_gateway" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
 
 resource "aws_key_pair" "edge_gateway" {
   key_name   = var.edge_gateway_key_pair_name
-  public_key = tls_private_key.edge_gateway.public_key_openssh
+  public_key = file(var.edge_gateway_public_key_path)
 }
 
 

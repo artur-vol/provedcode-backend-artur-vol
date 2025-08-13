@@ -183,12 +183,23 @@ variable "backend_key_pair_name" {
   description = "Name of the SSH key pair for the backend instance access"
 }
 
+variable "backend_public_key_path" {
+  description = "Path to the public SSH key for Backend"
+  type        = string
+  default     = "keys/backend.pub"
+}
 
 # Access Key
 variable "frontend_key_pair_name" {
   type        = string
   default     = "frontend"
   description = "Name of the SSH key pair for the frontend instance access"
+}
+
+variable "frontend_public_key_path" {
+  description = "Path to the public SSH key for Frontend"
+  type        = string
+  default     = "keys/frontend.pub"
 }
 
 # S3 Bucket
@@ -259,4 +270,8 @@ variable "edge_gateway_key_pair_name" {
   description = "Name of the SSH key pair for the bastion instance access"
 }
 
-
+variable "edge_gateway_public_key_path" {
+  description = "Path to the public SSH key for Edge Gateway"
+  type        = string
+  default     = "keys/edge-gateway.pub"
+}

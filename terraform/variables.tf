@@ -95,6 +95,13 @@ variable "private_route_table_name" {
   default     = "private_route_table"
 }
 
+# VPC Endpoint
+variable "vpc_endpoint_service_name" {
+  description = ""
+  type        = string
+  default     = "com.amazonaws.eu-central-1.s3"
+}
+
 # EC2 Frontend
 
 variable "frontend_instance_name" {

@@ -91,7 +91,6 @@ resource "aws_db_subnet_group" "this" {
   }
 }
 
-
 # Public Subnet Route Table
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.this.id
@@ -131,6 +130,19 @@ resource "aws_route_table_association" "private_subnet_1" {
 resource "aws_route_table_association" "private_subnet_2" {
   subnet_id      = aws_subnet.private_2.id
   route_table_id = aws_route_table.private.id
+}
+
+# VPC Endpoint
+resource "aws_vpc_endpoint" "this" {
+  vpc_id            = aws_vpc.this.id
+  service_name      = var.vpc_endpoint_service_name
+  vpc_endpoint_type = "Gateway"
+}
+
+# VPC Endpoint and Route Table Association
+resource "aws_vpc_endpoint_route_table_association" "this" {
+  route_table_id  = aws_route_table.private.id
+  vpc_endpoint_id = aws_vpc_endpoint.this.id
 }
 
 
@@ -301,8 +313,7 @@ resource "aws_key_pair" "deployer" {
 # ======= STORAGE =======
 # =======================
 
-
-# Random Values Generator
+# Random ID for bucket uniqueness
 resource "random_id" "this" {
   byte_length = 8
 }
@@ -313,29 +324,22 @@ resource "aws_s3_bucket" "this" {
 
   force_destroy = true
 
+  tags = {
+    Name = "${var.s3_bucket_name}-${random_id.this.hex}"
+  }
 }
 
-# Block public access
-resource "aws_s3_bucket_public_access_block" "this" {
-  bucket = aws_s3_bucket.this.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
-
-# IAM User with S3 Bucket access
+# IAM User for bucket access
 resource "aws_iam_user" "this" {
   name = var.user_name
 }
 
-
-# Credentials for IAM User
+# IAM Access Key for the user
 resource "aws_iam_access_key" "this" {
   user = aws_iam_user.this.name
 }
 
+# Policy granting access to the bucket
 resource "aws_iam_policy" "this" {
   name = var.policy_name
   policy = jsonencode({
@@ -346,35 +350,39 @@ resource "aws_iam_policy" "this" {
         Effect = "Allow",
         Action = [
           "s3:GetObject",
+          "s3:PutObject",
           "s3:DeleteObject",
-          "s3:PutObject"
+          "s3:ListBucket"
         ],
-        Resource = "${aws_s3_bucket.this.arn}/*"
+        Resource = [
+          "${aws_s3_bucket.this.arn}",
+          "${aws_s3_bucket.this.arn}/*"
+        ]
       }
     ]
   })
 }
 
-# Policy and IAM User Association
+# Attach the policy to the user
 resource "aws_iam_user_policy_attachment" "this" {
   user       = aws_iam_user.this.name
   policy_arn = aws_iam_policy.this.arn
 }
 
-# S3 Bucket User Secret Key
-resource "aws_ssm_parameter" "secret_key" {
-  name        = var.ssm_secret_key_name
-  description = var.ssm_secret_key_description
-  type        = "SecureString"
-  value       = aws_iam_access_key.this.secret
-  tier        = "Standard"
-}
-
-# S3 Bucket User Access Key
+# Store user's keys in Parameter Store
 resource "aws_ssm_parameter" "access_key" {
   name        = var.ssm_access_key_name
   description = var.ssm_access_key_description
   type        = "SecureString"
   value       = aws_iam_access_key.this.id
-  tier        = "Standard"
+  tier        = "Standart"
 }
+
+resource "aws_ssm_parameter" "secret_key" {
+  name        = var.ssm_secret_key_name
+  description = var.ssm_secret_key_description
+  type        = "SecureString"
+  value       = aws_iam_access_key.this.secret
+  tier        = "Standart"
+}
+

@@ -114,6 +114,13 @@ resource "aws_route_table" "private" {
   }
 }
 
+# Edge-Gateway Route
+resource "aws_route" "private_nat" {
+  route_table_id         = aws_route_table.private.id
+  destination_cidr_block = "0.0.0.0/0"
+  network_interface_id   = aws_instance.edge_gateway.primary_network_interface_id
+}
+
 # Public Subnet and Route Table Association
 resource "aws_route_table_association" "public_subnet" {
   subnet_id      = aws_subnet.public.id
@@ -218,13 +225,13 @@ resource "aws_security_group_rule" "frontend_https" {
 
 # Allow SSH
 resource "aws_security_group_rule" "frontend_ssh" {
-  type              = "ingress"
-  from_port         = 22
-  to_port           = 22
-  protocol          = "tcp"
-  cidr_blocks       = var.allowed_ssh_cidrs
-  description       = "Allow SSH access"
-  security_group_id = aws_security_group.frontend.id
+  type                     = "ingress"
+  from_port                = 22
+  to_port                  = 22
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.frontend.id
+  description              = "Allow SSH access"
+  source_security_group_id = aws_security_group.edge_gateway.id
 }
 
 # Allow all outbound traffic
@@ -284,13 +291,13 @@ resource "aws_security_group_rule" "backend_from_frontend" {
 
 # Allow SSH
 resource "aws_security_group_rule" "backend_ssh" {
-  type              = "ingress"
-  from_port         = 22
-  to_port           = 22
-  protocol          = "tcp"
-  cidr_blocks       = var.allowed_ssh_cidrs
-  security_group_id = aws_security_group.backend.id
-  description       = "Allow SSH access"
+  type                     = "ingress"
+  from_port                = 22
+  to_port                  = 22
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.backend.id
+  description              = "Allow SSH access"
+  source_security_group_id = aws_security_group.edge_gateway.id
 }
 
 # Allow all outbound traffic
@@ -394,14 +401,19 @@ resource "aws_ssm_parameter" "secret_key" {
 # ==== PROXY/BASTION ====
 # =======================
 
-# EC2 Instance
 resource "aws_instance" "edge_gateway" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
 
+  source_dest_check = false
+
+  associate_public_ip_address = true
+
   vpc_security_group_ids = [aws_security_group.edge_gateway.id]
   subnet_id              = aws_subnet.public.id
   key_name               = aws_key_pair.edge_gateway.key_name
+
+  # user_data = file("${path.module}/nat_setup.sh")
 
   tags = {
     Name = var.edge_gateway_instance_name
@@ -463,6 +475,16 @@ resource "aws_security_group_rule" "edge_gateway_egress_all" {
   cidr_blocks       = ["0.0.0.0/0"]
   description       = "Allow all outbound traffic"
   security_group_id = aws_security_group.edge_gateway.id
+}
+
+resource "aws_security_group_rule" "edge_gateway_nat_ingress" {
+  type              = "ingress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  security_group_id = aws_security_group.edge_gateway.id
+  cidr_blocks       = [var.private_subnet_cidr_block_1, var.private_subnet_cidr_block_2]
+  description       = "Allow all traffic from private subnets for NAT"
 }
 
 # SSH Key

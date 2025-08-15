@@ -275,3 +275,37 @@ variable "edge_gateway_public_key_path" {
   type        = string
   default     = "keys/edge-gateway.pub"
 }
+
+# Database
+
+# Database User
+variable "db_username" {
+  description = "Username for the database"
+  type        = string
+}
+
+# Database Password
+variable "db_password" {
+  description = "Password for the database"
+  type        = string
+  sensitive   = true
+}
+
+variable "db_engine_version" {
+  description = "Version of the database engine"
+  type        = string
+  default     = "17.5"
+}
+
+variable "db_instance_class" {
+  description = "Type of the Database instance image"
+  type        = string
+  default     = "db.t4g.micro"
+}
+
+variable "db_identifier" {
+  description = "Unique database identifier"
+  type        = string
+  default     = "provedcode-database"
+}
+

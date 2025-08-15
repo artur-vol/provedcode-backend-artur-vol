@@ -101,8 +101,7 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name = var.public_route_table_name
-  }
+  Name = var.public_route_table_name }
 }
 
 # Private Subnets Route Table
@@ -495,3 +494,20 @@ resource "aws_key_pair" "edge_gateway" {
 }
 
 
+# =======================
+# ====== DATABASE =======
+# =======================
+
+resource "aws_db_instance" "this" {
+  allocated_storage    = 20
+  db_subnet_group_name = aws_db_subnet_group.this.name
+  engine               = "postgres"
+  engine_version       = var.db_engine_version
+  identifier           = var.db_identifier
+  instance_class       = var.db_instance_class
+  password             = var.db_password
+  skip_final_snapshot  = true
+  storage_encrypted    = false
+  username             = var.db_username
+  apply_immediately    = true
+}

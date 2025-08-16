@@ -367,3 +367,62 @@ variable "frontend_instance_name" {
   type        = string
   default     = "frontend"
 }
+
+
+# Backend Module
+
+variable "backend_vpc_id" {
+  description = "VPC ID where backend will be deployed"
+  type        = string
+}
+
+variable "backend_subnet_id" {
+  description = "Subnet ID for the backend instance"
+  type        = string
+}
+
+variable "backend_edge_gateway_sg_id" {
+  description = "Security Group ID of the edge gateway for SSH access"
+  type        = string
+}
+
+variable "backend_frontend_sg_id" {
+  description = "Security Group ID of the frontend to allow backend access"
+  type        = string
+}
+
+variable "backend_sg_name" {
+  description = "Name for the backend security group"
+  type        = string
+  default     = "backend-security-group"
+}
+
+variable "backend_sg_revoke_rules" {
+  description = "Whether to revoke security group rules on delete"
+  type        = bool
+  default     = true
+}
+
+variable "backend_key_pair_name" {
+  description = "Name of the SSH key pair for backend"
+  type        = string
+  default     = "backend-key"
+}
+
+variable "backend_instance_ami" {
+  description = "AMI ID for the backend instance"
+  type        = string
+  default     = "ami-0a87a69d69fa289be"
+}
+
+variable "backend_instance_type" {
+  description = "EC2 instance type for backend"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "backend_instance_name" {
+  description = "Name tag for the backend EC2 instance"
+  type        = string
+  default     = "backend"
+}

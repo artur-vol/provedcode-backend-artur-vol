@@ -144,27 +144,20 @@ module "frontend" {
 module "backend" {
   source = "./modules/backend"
   
-  # VPC і Subnet
-  vpc_id   = module.network.vpc_id
-  subnet_id = module.network.private_subnet_ids[0]
+  vpc_id   = var.backend_vpc_id
+  subnet_id = var.backend_subnet_id
 
-  # SSH Edge-Gateway Security Group
-  edge_gateway_sg_id = module.edge_gateway.edge_gateway_sg_id
-  frontend_sg_id = module.frontend.frontend_sg_id
+  edge_gateway_sg_id = var.backend_edge_gateway_sg_id
+  frontend_sg_id     = var.backend_frontend_sg_id
 
-  # Security Group
-  backend_sg_name        = "backend-security-group"
-  backend_sg_revoke_rules = true
-  egress_cidrs             = ["0.0.0.0/0"]
+  backend_sg_name        = var.backend_sg_name
+  backend_sg_revoke_rules = var.backend_sg_revoke_rules
 
-  # SSH Key
-  backend_key_pair_name  = "backend-key"
+  backend_key_pair_name  = var.backend_key_pair_name
   backend_public_key_path = "/Users/arturvolinec/vsyake/soft-serve/devops-project-level/provedcode-backend-artur-vol/terraform/keys/backend.pub"
 
-  # EC2 Instance
-  instance_ami           = "ami-0a87a69d69fa289be"
-  instance_type          = "t3.micro"
-  backend_instance_name = "backend"
+  instance_ami           = var.backend_instance_ami
+  instance_type          = var.backend_instance_type
+  backend_instance_name  = var.backend_instance_name
 }
-
 

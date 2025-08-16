@@ -96,31 +96,27 @@ module "database" {
 module "edge_gateway" {
   source = "./modules/edge_gateway"
 
-  # VPC and Subnet
-  vpc_id  = module.network.vpc_id
-  subnet_id = module.network.public_subnet_id
+  vpc_id    = var.edge_vpc_id
+  subnet_id = var.edge_subnet_id
 
-  # NAT Private subnets CIDR
-  private_subnet_cidr_block_1 = "10.0.2.0/24"
-  private_subnet_cidr_block_2 = "10.0.3.0/24"
-  private_route_table_id      = module.network.private_route_table_id
+  private_subnet_cidr_block_1 = var.edge_private_subnet_cidr_block_1
+  private_subnet_cidr_block_2 = var.edge_private_subnet_cidr_block_2
+  private_route_table_id      = var.edge_private_route_table_id
 
-  # Security Group
-  edge_gateway_sg_name        = "edge-gateway-security-group"
-  edge_gateway_sg_revoke_rules = true
-  allowed_http_cidrs          = ["0.0.0.0/0"]
-  allowed_https_cidrs         = ["0.0.0.0/0"]
-  allowed_ssh_cidrs           = ["178.212.243.25/32"]
+  edge_gateway_sg_name         = var.edge_sg_name
+  edge_gateway_sg_revoke_rules = var.edge_sg_revoke_rules
+  allowed_http_cidrs           = var.allowed_http_cidrs
+  allowed_https_cidrs          = var.allowed_https_cidrs
+  allowed_ssh_cidrs            = ["178.212.243.25/32"]
 
-  # EC2 Instance
-  instance_ami                = "ami-0a87a69d69fa289be"
-  instance_type               = "t3.micro"
-  edge_gateway_instance_name  = "edge-gateway"
+  instance_ami               = var.edge_instance_ami
+  instance_type              = var.edge_instance_type
+  edge_gateway_instance_name = var.edge_instance_name
 
-  # SSH Key
-  edge_gateway_key_pair_name  = "edge-gateway-key"
+  edge_gateway_key_pair_name = var.edge_key_pair_name
   edge_gateway_public_key_path = "/Users/arturvolinec/vsyake/soft-serve/devops-project-level/provedcode-backend-artur-vol/terraform/keys/edge-gateway.pub"
 }
+
 
 # frontend
 

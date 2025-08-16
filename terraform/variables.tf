@@ -235,3 +235,81 @@ variable "apply_immediately" {
   type        = bool
   default     = true
 }
+
+
+# Edge-Gateway Module 
+
+variable "edge_vpc_id" {
+  description = "VPC ID for the edge gateway"
+  type        = string
+}
+
+variable "edge_subnet_id" {
+  description = "Subnet ID for the edge gateway"
+  type        = string
+}
+
+variable "edge_private_subnet_cidr_block_1" {
+  description = "CIDR block of first private subnet"
+  type        = string
+  default     = "10.0.2.0/24"
+}
+
+variable "edge_private_subnet_cidr_block_2" {
+  description = "CIDR block of second private subnet"
+  type        = string
+  default     = "10.0.3.0/24"
+}
+
+variable "edge_private_route_table_id" {
+  description = "Private route table ID for NAT"
+  type        = string
+}
+
+variable "edge_sg_name" {
+  description = "Name of the edge gateway security group"
+  type        = string
+  default     = "edge-gateway-security-group"
+}
+
+variable "edge_sg_revoke_rules" {
+  description = "Revoke security group rules on delete"
+  type        = bool
+  default     = true
+}
+
+variable "allowed_http_cidrs" {
+  description = "CIDR blocks allowed for HTTP"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+variable "allowed_https_cidrs" {
+  description = "CIDR blocks allowed for HTTPS"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+variable "edge_instance_ami" {
+  description = "AMI for edge gateway EC2"
+  type        = string
+  default     = "ami-0a87a69d69fa289be"
+}
+
+variable "edge_instance_type" {
+  description = "Instance type for edge gateway EC2"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "edge_instance_name" {
+  description = "Name tag for edge gateway EC2"
+  type        = string
+  default     = "edge-gateway"
+}
+
+variable "edge_key_pair_name" {
+  description = "SSH key pair name for edge gateway"
+  type        = string
+  default     = "edge-gateway-key"
+}

@@ -24,3 +24,8 @@ output "private_subnet_ids" {
 output "private_route_table_id" {
   value = aws_route_table.private.id
 }
+
+# Database Group Subnet Name
+output "db_subnet_group_name" {
+  value = aws_db_subnet_group.this.name
+}

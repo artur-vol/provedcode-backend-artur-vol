@@ -20,494 +20,176 @@ provider "aws" {
 }
 
 
-# =======================
-# ======= NETWORK =======
-# =======================
+# network
 
-# Virtual Private Network
-resource "aws_vpc" "this" {
-  cidr_block           = var.vpc_cidr_block
-  enable_dns_support   = true
-  enable_dns_hostnames = true
+module "network" {
+  source = "./modules/network"
 
-  tags = {
-    Name = var.vpc_name
-  }
-}
+  # VPC
+  vpc_cidr_block   = "10.0.0.0/16"
+  vpc_dns_support  = true
+  vpc_dns_hostnames = true
+  vpc_name         = "provedcode-vpc"
 
-# Internet Gateway 
-resource "aws_internet_gateway" "this" {
-  vpc_id = aws_vpc.this.id
+  # Internet Gateway
+  igw_name = "provedcode-internet-gateway"
 
-  tags = {
-    Name = var.igw_name
-  }
-}
+  # Public Subnet
+  public_subnet_cidr_block = "10.0.1.0/24"
+  public_subnet_az         = "eu-central-1a"
+  map_public_ip            = true
+  public_subnet_name       = "public-subnet"
 
-# Public Subnet
-resource "aws_subnet" "public" {
-  vpc_id                  = aws_vpc.this.id
-  cidr_block              = var.public_subnet_cidr_block
-  availability_zone       = var.public_subnet_az
-  map_public_ip_on_launch = true
+  # Private Subnets
+  private_subnet_az_1       = "eu-central-1a"
+  private_subnet_az_2       = "eu-central-1b"
+  private_subnet_cidr_block_1 = "10.0.2.0/24"
+  private_subnet_cidr_block_2 = "10.0.3.0/24"
+  private_subnet_name       = "private-subnet"
 
-  tags = {
-    Name = var.public_subnet_name
-  }
-}
+  # Route Tables
+  public_route_table_cidr  = "0.0.0.0/0"
+  public_route_table_name  = "public-route-table"
+  private_route_table_name = "private-route-table"
 
-# Private Subnet_1
-resource "aws_subnet" "private_1" {
-  vpc_id            = aws_vpc.this.id
-  cidr_block        = var.private_subnet_cidr_block_1
-  availability_zone = var.private_subnet_az_1
-
-  tags = {
-    Name = "${var.private_subnet_name}-1"
-  }
-}
-
-# Private Subnet_2
-resource "aws_subnet" "private_2" {
-  vpc_id            = aws_vpc.this.id
-  cidr_block        = var.private_subnet_cidr_block_2
-  availability_zone = var.private_subnet_az_2
-
-  tags = {
-    Name = "${var.private_subnet_name}-2"
-  }
-}
-
-# Private Subnet Group
-resource "aws_db_subnet_group" "this" {
-  name = "${var.vpc_name}-db-subnet-group"
-  subnet_ids = [
-    aws_subnet.private_1.id,
-    aws_subnet.private_2.id,
-  ]
-
-  tags = {
-    Name = "${var.vpc_name}-db-subnet-group"
-  }
-}
-
-# Public Subnet Route Table
-resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.this.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.this.id
-  }
-
-  tags = {
-  Name = var.public_route_table_name }
-}
-
-# Private Subnets Route Table
-resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.this.id
-
-  tags = {
-    Name = var.private_route_table_name
-  }
-}
-
-# Edge-Gateway Route
-resource "aws_route" "private_nat" {
-  route_table_id         = aws_route_table.private.id
-  destination_cidr_block = "0.0.0.0/0"
-  network_interface_id   = aws_instance.edge_gateway.primary_network_interface_id
-}
-
-# Public Subnet and Route Table Association
-resource "aws_route_table_association" "public_subnet" {
-  subnet_id      = aws_subnet.public.id
-  route_table_id = aws_route_table.public.id
-}
-
-# Private Subnet_1 and Route Table Association
-resource "aws_route_table_association" "private_subnet_1" {
-  subnet_id      = aws_subnet.private_1.id
-  route_table_id = aws_route_table.private.id
-}
-
-# Private Subnet_2 and Route Table Association
-resource "aws_route_table_association" "private_subnet_2" {
-  subnet_id      = aws_subnet.private_2.id
-  route_table_id = aws_route_table.private.id
-}
-
-# VPC Endpoint
-resource "aws_vpc_endpoint" "this" {
-  vpc_id            = aws_vpc.this.id
-  service_name      = var.vpc_endpoint_service_name
-  vpc_endpoint_type = "Gateway"
-}
-
-# VPC Endpoint and Route Table Association
-resource "aws_vpc_endpoint_route_table_association" "this" {
-  route_table_id  = aws_route_table.private.id
-  vpc_endpoint_id = aws_vpc_endpoint.this.id
+  # VPC Endpoint
+  vpc_endpoint_service_name = "com.amazonaws.eu-central-1.s3"
+  vpc_endpoint_type         = "Gateway"
 }
 
 
-# =======================
-# ======= COMPUTE =======
-# =======================
+# storage
 
-# EC2 Instance
-resource "aws_instance" "frontend" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = var.instance_type
+module "storage" {
+  source = "./modules/storage"
 
-  vpc_security_group_ids = [aws_security_group.frontend.id]
-  subnet_id              = aws_subnet.private_1.id
-  key_name               = aws_key_pair.frontend.key_name
+  # S3 Bucket
+  s3_bucket_name = "provedcode-s3-bucket"
+  force_destroy  = true
 
-  tags = {
-    Name = var.frontend_instance_name
-  }
-}
+  # IAM User
+  user_name = "provedcode-s3-user"
 
-# EC2 AMI
-data "aws_ami" "ubuntu" {
-  most_recent = true
+  # IAM Policy
+  policy_name = "provedcode-s3-policy"
 
-  filter {
-    name   = "name"
-    values = [var.ami_name_filter]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = [var.virtualization_type]
-  }
-
-  owners = [var.ami_owner]
-}
-
-# Frontend Security Group
-resource "aws_security_group" "frontend" {
-  name        = var.frontend_sg_name
-  description = "Security group for frontend server"
-  vpc_id      = aws_vpc.this.id
-
-  revoke_rules_on_delete = true
-
-  tags = {
-    Name = var.frontend_sg_name
-  }
-}
-
-# Allow HTTP traffic
-resource "aws_security_group_rule" "frontend_http" {
-  type              = "ingress"
-  from_port         = 80
-  to_port           = 80
-  protocol          = "tcp"
-  cidr_blocks       = var.allowed_http_cidrs
-  description       = "Allow HTTP traffic"
-  security_group_id = aws_security_group.frontend.id
-}
-
-# Allow HTTPS traffic
-resource "aws_security_group_rule" "frontend_https" {
-  type              = "ingress"
-  from_port         = 443
-  to_port           = 443
-  protocol          = "tcp"
-  cidr_blocks       = var.allowed_https_cidrs
-  description       = "Allow HTTPS traffic"
-  security_group_id = aws_security_group.frontend.id
-}
-
-# Allow SSH
-resource "aws_security_group_rule" "frontend_ssh" {
-  type                     = "ingress"
-  from_port                = 22
-  to_port                  = 22
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.frontend.id
-  description              = "Allow SSH access"
-  source_security_group_id = aws_security_group.edge_gateway.id
-}
-
-# Allow all outbound traffic
-resource "aws_security_group_rule" "frontend_egress_all" {
-  type              = "egress"
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
-  cidr_blocks       = ["0.0.0.0/0"]
-  description       = "Allow all outbound traffic"
-  security_group_id = aws_security_group.frontend.id
-}
-
-# SSH Key
-
-resource "aws_key_pair" "frontend" {
-  key_name   = var.frontend_key_pair_name
-  public_key = file(var.frontend_public_key_path)
-}
-
-# EC2 Backend
-resource "aws_instance" "backend" {
-  ami                    = data.aws_ami.ubuntu.id
-  instance_type          = var.instance_type
-  vpc_security_group_ids = [aws_security_group.backend.id]
-  subnet_id              = aws_subnet.private_1.id
-  key_name               = aws_key_pair.backend.key_name
-
-  tags = {
-    Name = var.backend_instance_name
-  }
-}
-
-# Backend Security Group
-resource "aws_security_group" "backend" {
-  name        = var.backend_sg_name
-  description = "Security group for backend server"
-  vpc_id      = aws_vpc.this.id
-
-  revoke_rules_on_delete = true
-
-  tags = {
-    Name = var.backend_sg_name
-  }
-}
-
-# Allow access from frontend SG
-resource "aws_security_group_rule" "backend_from_frontend" {
-  type                     = "ingress"
-  from_port                = 8080
-  to_port                  = 8080
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.backend.id
-  description              = "Allow backend access from frontend SG"
-  source_security_group_id = aws_security_group.frontend.id
-}
-
-# Allow SSH
-resource "aws_security_group_rule" "backend_ssh" {
-  type                     = "ingress"
-  from_port                = 22
-  to_port                  = 22
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.backend.id
-  description              = "Allow SSH access"
-  source_security_group_id = aws_security_group.edge_gateway.id
-}
-
-# Allow all outbound traffic
-resource "aws_security_group_rule" "backend_egress" {
-  type              = "egress"
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.backend.id
-  description       = "Allow all outbound traffic"
-}
-
-# SSH Key
-
-resource "aws_key_pair" "backend" {
-  key_name   = var.backend_key_pair_name
-  public_key = file(var.backend_public_key_path)
+  # SSM Parameters
+  ssm_access_key_name        = "/provedcode/s3/access_key"
+  ssm_access_key_description = "Access key for S3 user"
+  ssm_secret_key_name        = "/provedcode/s3/secret_key"
+  ssm_secret_key_description = "Secret key for S3 user"
 }
 
 
-# =======================
-# ======= STORAGE =======
-# =======================
+# database
 
-# Random ID for bucket uniqueness
-resource "random_id" "this" {
-  byte_length = 8
-}
+module "database" {
+  source = "./modules/database"
 
-# S3 Bucket
-resource "aws_s3_bucket" "this" {
-  bucket = "${var.s3_bucket_name}-${random_id.this.hex}"
+  # Subnet Group
+  db_subnet_group_name = module.network.db_subnet_group_name
 
-  force_destroy = true
+  # RDS configs
+  db_engine         = "postgres"
+  db_engine_version = "17.5"
+  db_identifier     = "provedcode-database"
+  db_instance_class = "db.t4g.micro"
+  db_username       = "change me!!!"
+  db_password       = "change me!!!"
 
-  tags = {
-    Name = "${var.s3_bucket_name}-${random_id.this.hex}"
-  }
-}
-
-# IAM User for bucket access
-resource "aws_iam_user" "this" {
-  name = var.user_name
-}
-
-# IAM Access Key for the user
-resource "aws_iam_access_key" "this" {
-  user = aws_iam_user.this.name
-}
-
-# Policy granting access to the bucket
-resource "aws_iam_policy" "this" {
-  name = var.policy_name
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Sid    = "Statement1",
-        Effect = "Allow",
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:DeleteObject",
-          "s3:ListBucket"
-        ],
-        Resource = [
-          "${aws_s3_bucket.this.arn}",
-          "${aws_s3_bucket.this.arn}/*"
-        ]
-      }
-    ]
-  })
-}
-
-# Attach the policy to the user
-resource "aws_iam_user_policy_attachment" "this" {
-  user       = aws_iam_user.this.name
-  policy_arn = aws_iam_policy.this.arn
-}
-
-# Store user's keys in Parameter Store
-resource "aws_ssm_parameter" "access_key" {
-  name        = var.ssm_access_key_name
-  description = var.ssm_access_key_description
-  type        = "SecureString"
-  value       = aws_iam_access_key.this.id
-  tier        = "Standard"
-}
-
-resource "aws_ssm_parameter" "secret_key" {
-  name        = var.ssm_secret_key_name
-  description = var.ssm_secret_key_description
-  type        = "SecureString"
-  value       = aws_iam_access_key.this.secret
-  tier        = "Standard"
-}
-
-
-# =======================
-# ==== PROXY/BASTION ====
-# =======================
-
-resource "aws_instance" "edge_gateway" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = var.instance_type
-
-  source_dest_check = false
-
-  associate_public_ip_address = true
-
-  vpc_security_group_ids = [aws_security_group.edge_gateway.id]
-  subnet_id              = aws_subnet.public.id
-  key_name               = aws_key_pair.edge_gateway.key_name
-
-  # user_data = file("${path.module}/nat_setup.sh")
-
-  tags = {
-    Name = var.edge_gateway_instance_name
-  }
-}
-
-# Edge-Gateway Security Group
-resource "aws_security_group" "edge_gateway" {
-  name        = var.edge_gateway_sg_name
-  description = "Security group for edge-gateway server"
-  vpc_id      = aws_vpc.this.id
-
-  revoke_rules_on_delete = true
-
-  tags = {
-    Name = var.edge_gateway_sg_name
-  }
-}
-
-# Allow HTTP traffic
-resource "aws_security_group_rule" "edge_gateway_http" {
-  type              = "ingress"
-  from_port         = 80
-  to_port           = 80
-  protocol          = "tcp"
-  cidr_blocks       = var.allowed_http_cidrs
-  description       = "Allow HTTP traffic"
-  security_group_id = aws_security_group.edge_gateway.id
-}
-
-# Allow HTTPS traffic
-resource "aws_security_group_rule" "edge_gateway_https" {
-  type              = "ingress"
-  from_port         = 443
-  to_port           = 443
-  protocol          = "tcp"
-  cidr_blocks       = var.allowed_https_cidrs
-  description       = "Allow HTTPS traffic"
-  security_group_id = aws_security_group.edge_gateway.id
-}
-
-# Allow SSH
-resource "aws_security_group_rule" "edge_gateway_ssh" {
-  type              = "ingress"
-  from_port         = 22
-  to_port           = 22
-  protocol          = "tcp"
-  cidr_blocks       = var.allowed_ssh_cidrs
-  description       = "Allow SSH access"
-  security_group_id = aws_security_group.edge_gateway.id
-}
-
-# Allow all outbound traffic
-resource "aws_security_group_rule" "edge_gateway_egress_all" {
-  type              = "egress"
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
-  cidr_blocks       = ["0.0.0.0/0"]
-  description       = "Allow all outbound traffic"
-  security_group_id = aws_security_group.edge_gateway.id
-}
-
-resource "aws_security_group_rule" "edge_gateway_nat_ingress" {
-  type              = "ingress"
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
-  security_group_id = aws_security_group.edge_gateway.id
-  cidr_blocks       = [var.private_subnet_cidr_block_1, var.private_subnet_cidr_block_2]
-  description       = "Allow all traffic from private subnets for NAT"
-}
-
-# SSH Key
-
-resource "aws_key_pair" "edge_gateway" {
-  key_name   = var.edge_gateway_key_pair_name
-  public_key = file(var.edge_gateway_public_key_path)
-}
-
-
-# =======================
-# ====== DATABASE =======
-# =======================
-
-resource "aws_db_instance" "this" {
-  allocated_storage    = 20
-  db_subnet_group_name = aws_db_subnet_group.this.name
-  engine               = "postgres"
-  engine_version       = var.db_engine_version
-  identifier           = var.db_identifier
-  instance_class       = var.db_instance_class
-  password             = var.db_password
+  db_allocated_storage = 20
   skip_final_snapshot  = true
   storage_encrypted    = false
-  username             = var.db_username
   apply_immediately    = true
 }
+
+
+# edge-gateway
+
+module "edge_gateway" {
+  source = "./modules/edge_gateway"
+
+  # VPC and Subnet
+  vpc_id  = module.network.vpc_id
+  subnet_id = module.network.public_subnet_id
+
+  # NAT Private subnets CIDR
+  private_subnet_cidr_block_1 = "10.0.2.0/24"
+  private_subnet_cidr_block_2 = "10.0.3.0/24"
+  private_route_table_id      = module.network.private_route_table_id
+
+  # Security Group
+  edge_gateway_sg_name        = "edge-gateway-security-group"
+  edge_gateway_sg_revoke_rules = true
+  allowed_http_cidrs          = ["0.0.0.0/0"]
+  allowed_https_cidrs         = ["0.0.0.0/0"]
+  allowed_ssh_cidrs           = ["178.212.243.25/32"]
+
+  # EC2 Instance
+  instance_ami                = "ami-0a87a69d69fa289be"
+  instance_type               = "t3.micro"
+  edge_gateway_instance_name  = "edge-gateway"
+
+  # SSH Key
+  edge_gateway_key_pair_name  = "edge-gateway-key"
+  edge_gateway_public_key_path = "/Users/arturvolinec/vsyake/soft-serve/devops-project-level/provedcode-backend-artur-vol/terraform/keys/edge-gateway.pub"
+}
+
+# frontend
+
+module "frontend" {
+  source = "./modules/frontend"
+
+  # VPC і Subnet
+  vpc_id   = module.network.vpc_id
+  subnet_id = module.network.private_subnet_ids[0]
+
+  # SSH Edge-Gateway Security Group
+  edge_gateway_sg_id = module.edge_gateway.edge_gateway_sg_id
+
+  # Security Group
+  frontend_sg_name        = "frontend-security-group"
+  frontend_sg_revoke_rules = true
+  allowed_http_cidrs       = ["0.0.0.0/0"]
+  allowed_https_cidrs      = ["0.0.0.0/0"]
+  egress_cidrs             = ["0.0.0.0/0"]
+
+  # SSH Key
+  frontend_key_pair_name  = "frontend-key"
+  frontend_public_key_path = "/Users/arturvolinec/vsyake/soft-serve/devops-project-level/provedcode-backend-artur-vol/terraform/keys/frontend.pub"
+
+  # EC2 Instance
+  instance_ami           = "ami-0a87a69d69fa289be"
+  instance_type          = "t3.micro"
+  frontend_instance_name = "frontend"
+}
+
+# backend
+
+module "backend" {
+  source = "./modules/backend"
+  
+  # VPC і Subnet
+  vpc_id   = module.network.vpc_id
+  subnet_id = module.network.private_subnet_ids[0]
+
+  # SSH Edge-Gateway Security Group
+  edge_gateway_sg_id = module.edge_gateway.edge_gateway_sg_id
+  frontend_sg_id = module.frontend.frontend_sg_id
+
+  # Security Group
+  backend_sg_name        = "backend-security-group"
+  backend_sg_revoke_rules = true
+  egress_cidrs             = ["0.0.0.0/0"]
+
+  # SSH Key
+  backend_key_pair_name  = "backend-key"
+  backend_public_key_path = "/Users/arturvolinec/vsyake/soft-serve/devops-project-level/provedcode-backend-artur-vol/terraform/keys/backend.pub"
+
+  # EC2 Instance
+  instance_ami           = "ami-0a87a69d69fa289be"
+  instance_type          = "t3.micro"
+  backend_instance_name = "backend"
+}
+
+

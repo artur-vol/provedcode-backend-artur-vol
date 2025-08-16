@@ -99,8 +99,8 @@ module "edge_gateway" {
   vpc_id    = module.network.vpc_id
   subnet_id = module.network.public_subnet_id
 
-  private_subnet_cidr_block_1 = module.network.private_subnet_ids[0]
-  private_subnet_cidr_block_2 = module.network.private_subnet_ids[1]
+  private_subnet_cidr_block_1 = module.network.private_subnet_cidrs[0]
+  private_subnet_cidr_block_2 = module.network.private_subnet_cidrs[1]
   private_route_table_id      = module.network.private_route_table_id
 
   edge_gateway_sg_name         = var.edge_sg_name

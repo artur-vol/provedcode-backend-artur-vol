@@ -104,3 +104,17 @@ variable "private_route_table_name" {
   type        = string
 }
 
+
+# VPC Endpoint
+
+variable "vpc_endpoint_service_name" {
+  description = "Name of the VPC endpoint service"
+  type        = string
+  default     = null
+}
+
+variable "vpc_endpoint_type" {
+  description = "Type of the VPC endpoint (Gateway/Interface)"
+  type        = string
+  default     = null
+}

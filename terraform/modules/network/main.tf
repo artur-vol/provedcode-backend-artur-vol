@@ -1,6 +1,7 @@
 # Network Module
 # main.tf
 
+
 # Virtual Private Network
 resource "aws_vpc" "this" {
   cidr_block           = var.vpc_cidr_block
@@ -90,14 +91,7 @@ resource "aws_route_table" "private" {
     Name = var.private_route_table_name
   }
 }
-#
-# # Edge-Gateway Route
-# resource "aws_route" "private_nat" {
-#   route_table_id         = aws_route_table.private.id
-#   destination_cidr_block = var.private_nat_destination_cidr # "0.0.0.0/0"
-#   network_interface_id   = aws_instance.edge_gateway.primary_network_interface_id
-# }
-#
+
 # Public Subnet and Route Table Association
 resource "aws_route_table_association" "public_subnet" {
   subnet_id      = aws_subnet.public.id
@@ -115,16 +109,16 @@ resource "aws_route_table_association" "private_subnet_2" {
   subnet_id      = aws_subnet.private_2.id
   route_table_id = aws_route_table.private.id
 }
-#
-# # VPC Endpoint
-# resource "aws_vpc_endpoint" "this" {
-#   vpc_id            = aws_vpc.this.id
-#   service_name      = var.vpc_endpoint_service_name
-#   vpc_endpoint_type = var.vpc_endpoint_type # "Gateway"
-# }
-#
-# # VPC Endpoint and Route Table Association
-# resource "aws_vpc_endpoint_route_table_association" "this" {
-#   route_table_id  = aws_route_table.private.id
-#   vpc_endpoint_id = aws_vpc_endpoint.this.id
-# }
+
+# VPC Endpoint
+resource "aws_vpc_endpoint" "this" {
+  vpc_id            = aws_vpc.this.id
+  service_name      = var.vpc_endpoint_service_name
+  vpc_endpoint_type = var.vpc_endpoint_type # "Gateway"
+}
+
+# VPC Endpoint and Route Table Association
+resource "aws_vpc_endpoint_route_table_association" "this" {
+ route_table_id  = aws_route_table.private.id
+ vpc_endpoint_id = aws_vpc_endpoint.this.id
+}

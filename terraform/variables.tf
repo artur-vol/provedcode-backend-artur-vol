@@ -313,3 +313,57 @@ variable "edge_key_pair_name" {
   type        = string
   default     = "edge-gateway-key"
 }
+
+
+# Frontend Module
+
+variable "frontend_vpc_id" {
+  description = "VPC ID where frontend will be deployed"
+  type        = string
+}
+
+variable "frontend_subnet_id" {
+  description = "Subnet ID for the frontend instance"
+  type        = string
+}
+
+variable "frontend_edge_gateway_sg_id" {
+  description = "Security Group ID of the edge gateway for SSH access"
+  type        = string
+}
+
+variable "frontend_sg_name" {
+  description = "Name for the frontend security group"
+  type        = string
+  default     = "frontend-security-group"
+}
+
+variable "frontend_sg_revoke_rules" {
+  description = "Whether to revoke security group rules on delete"
+  type        = bool
+  default     = true
+}
+
+variable "frontend_key_pair_name" {
+  description = "Name of the SSH key pair for frontend"
+  type        = string
+  default     = "frontend-key"
+}
+
+variable "frontend_instance_ami" {
+  description = "AMI ID for the frontend instance"
+  type        = string
+  default     = "ami-0a87a69d69fa289be"
+}
+
+variable "frontend_instance_type" {
+  description = "EC2 instance type for frontend"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "frontend_instance_name" {
+  description = "Name tag for the frontend EC2 instance"
+  type        = string
+  default     = "frontend"
+}

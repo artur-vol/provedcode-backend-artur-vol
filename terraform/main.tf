@@ -57,21 +57,16 @@ module "network" {
 module "storage" {
   source = "./modules/storage"
 
-  # S3 Bucket
-  s3_bucket_name = "provedcode-s3-bucket"
-  force_destroy  = true
+  s3_bucket_name = var.s3_bucket_name
+  force_destroy  = var.force_destroy
 
-  # IAM User
-  user_name = "provedcode-s3-user"
+  user_name = var.storage_user_name
+  policy_name = var.storage_policy_name
 
-  # IAM Policy
-  policy_name = "provedcode-s3-policy"
-
-  # SSM Parameters
-  ssm_access_key_name        = "/provedcode/s3/access_key"
-  ssm_access_key_description = "Access key for S3 user"
-  ssm_secret_key_name        = "/provedcode/s3/secret_key"
-  ssm_secret_key_description = "Secret key for S3 user"
+  ssm_access_key_name        = var.ssm_access_key_name
+  ssm_access_key_description = var.ssm_access_key_description
+  ssm_secret_key_name        = var.ssm_secret_key_name
+  ssm_secret_key_description = var.ssm_secret_key_description
 }
 
 

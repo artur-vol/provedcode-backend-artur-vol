@@ -119,3 +119,56 @@ variable "vpc_endpoint_type" {
   type        = string
   default     = "Gateway"
 }
+
+
+# S3 Bucket
+variable "s3_bucket_name" {
+  description = "Base name for the S3 bucket"
+  type        = string
+  default     = "provedcode-s3-bucket"
+}
+
+variable "force_destroy" {
+  description = "Allow Terraform to delete bucket even if it contains objects"
+  type        = bool
+  default     = true
+}
+
+# IAM User
+variable "storage_user_name" {
+  description = "IAM username for bucket access"
+  type        = string
+  default     = "provedcode-s3-user"
+}
+
+# IAM Policy
+variable "storage_policy_name" {
+  description = "Name of the IAM policy for bucket access"
+  type        = string
+  default     = "provedcode-s3-policy"
+}
+
+# SSM Parameter Store
+variable "ssm_access_key_name" {
+  description = "Name for storing IAM access key in SSM"
+  type        = string
+  default     = "/provedcode/s3/access_key"
+}
+
+variable "ssm_access_key_description" {
+  description = "Description for SSM parameter of IAM access key"
+  type        = string
+  default     = "Access key for S3 user"
+}
+
+variable "ssm_secret_key_name" {
+  description = "Name for storing IAM secret key in SSM"
+  type        = string
+  default     = "/provedcode/s3/secret_key"
+}
+
+variable "ssm_secret_key_description" {
+  description = "Description for SSM parameter of IAM secret key"
+  type        = string
+  default     = "Secret key for S3 user"
+}

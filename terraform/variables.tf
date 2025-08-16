@@ -1,5 +1,41 @@
 # variables.tf
 
+# Region
+variable "region" {
+  description = "AWS Region"
+  type = string
+  default = "eu-central-1"
+}
+
+# Database credentials
+variable "db_username" {
+  description = "Master username for the database"
+  type        = string
+  sensitive = true
+}
+
+variable "db_password" {
+  description = "Master password for the database"
+  type        = string
+  sensitive   = true
+}
+
+# SSH keys paths
+variable "edge_gateway_public_key_path" {
+  description = "Path to the public key for Edge Gateway"
+  type        = string
+}
+
+variable "frontend_public_key_path" {
+  description = "Path to the public key for Frontend"
+  type        = string
+}
+
+variable "backend_public_key_path" {
+  description = "Path to the public key for Backend"
+  type        = string
+}
+
 
 # Network Module
 

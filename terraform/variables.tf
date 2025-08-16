@@ -1,19 +1,22 @@
 # variables.tf
 
-# Provider
-
-variable "region" {
-  description = "AWS region where resources will be created"
-  type        = string
-  default     = "eu-central-1"
-}
-
 # VPC
-
 variable "vpc_cidr_block" {
   description = "CIDR block for the VPC"
   type        = string
   default     = "10.0.0.0/16"
+}
+
+variable "vpc_dns_support" {
+  description = "Enable DNS support in VPC"
+  type        = bool
+  default     = true
+}
+
+variable "vpc_dns_hostnames" {
+  description = "Enable DNS hostnames in VPC"
+  type        = bool
+  default     = true
 }
 
 variable "vpc_name" {
@@ -23,15 +26,13 @@ variable "vpc_name" {
 }
 
 # Internet Gateway
-
 variable "igw_name" {
-  description = "Name tag for the Internet Gateway"
+  description = "Name for the Internet Gateway"
   type        = string
-  default     = "my_igw"
+  default     = "provedcode-internet-gateway"
 }
 
 # Public Subnet
-
 variable "public_subnet_cidr_block" {
   description = "CIDR block for the public subnet"
   type        = string
@@ -39,27 +40,32 @@ variable "public_subnet_cidr_block" {
 }
 
 variable "public_subnet_az" {
-  description = "Availability Zone for the public subnet"
+  description = "Availability zone for the public subnet"
   type        = string
   default     = "eu-central-1a"
+}
+
+variable "map_public_ip" {
+  description = "Map public IP on launch for public subnet"
+  type        = bool
+  default     = true
 }
 
 variable "public_subnet_name" {
   description = "Name tag for the public subnet"
   type        = string
-  default     = "public_subnet"
+  default     = "public-subnet"
 }
 
 # Private Subnets
-
 variable "private_subnet_az_1" {
-  description = "Availability Zone for the first private subnet"
+  description = "Availability zone for the first private subnet"
   type        = string
   default     = "eu-central-1a"
 }
 
 variable "private_subnet_az_2" {
-  description = "Availability Zone for the second private subnet"
+  description = "Availability zone for the second private subnet"
   type        = string
   default     = "eu-central-1b"
 }
@@ -77,235 +83,39 @@ variable "private_subnet_cidr_block_2" {
 }
 
 variable "private_subnet_name" {
-  description = "Name tag for the private subnet"
+  description = "Name tag for private subnets"
   type        = string
-  default     = "private_subnet"
+  default     = "private-subnet"
 }
 
-# Route Table
-variable "public_route_table_name" {
-  description = "Name tag for the public route table"
+# Route Tables
+variable "public_route_table_cidr" {
+  description = "Destination CIDR for public route table"
   type        = string
-  default     = "public_route_table"
+  default     = "0.0.0.0/0"
+}
+
+variable "public_route_table_name" {
+  description = "Name for the public route table"
+  type        = string
+  default     = "public-route-table"
 }
 
 variable "private_route_table_name" {
-  description = "Name tag for the private route table"
+  description = "Name for the private route table"
   type        = string
-  default     = "private_route_table"
+  default     = "private-route-table"
 }
 
 # VPC Endpoint
 variable "vpc_endpoint_service_name" {
-  description = ""
+  description = "Service name for VPC endpoint"
   type        = string
   default     = "com.amazonaws.eu-central-1.s3"
 }
 
-# EC2 Frontend
-
-variable "frontend_instance_name" {
-  description = "Name tag for the frontend EC2 instance"
+variable "vpc_endpoint_type" {
+  description = "Type of the VPC endpoint"
   type        = string
-  default     = "frontend"
+  default     = "Gateway"
 }
-
-variable "instance_type" {
-  description = "EC2 instance type"
-  type        = string
-  default     = "t3.micro"
-}
-
-# EC2 Backend
-variable "backend_instance_name" {
-  description = "Name tag for the EC2 instance"
-  type        = string
-  default     = "backend"
-}
-
-
-# AMI
-
-variable "ami_name_filter" {
-  description = "AMI name filter pattern"
-  type        = string
-  default     = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
-}
-
-variable "virtualization_type" {
-  description = "Virtualization type filter for AMI"
-  type        = string
-  default     = "hvm"
-}
-
-variable "ami_owner" {
-  description = "Owner ID of the AMI"
-  type        = string
-  default     = "099720109477" # Canonicals
-}
-
-# Security Groups
-
-variable "frontend_sg_name" {
-  description = "The name of the frontend Security Group"
-  type        = string
-  default     = "frontend-sg"
-}
-
-variable "allowed_http_cidrs" {
-  type        = list(string)
-  default     = ["0.0.0.0/0"]
-  description = "List of CIDR blocks allowed for HTTP traffic (port 80)"
-}
-
-variable "allowed_https_cidrs" {
-  type        = list(string)
-  default     = ["0.0.0.0/0"]
-  description = "List of CIDR blocks allowed for HTTPS traffic (port 443)"
-}
-
-variable "allowed_ssh_cidrs" {
-  type        = list(string)
-  default     = ["178.212.243.25/32"]
-  description = "List of CIDR blocks allowed for SSH access (port 22)"
-}
-
-variable "backend_sg_name" {
-  type        = string
-  default     = "backend_sg"
-  description = "Name of the Security Group for backend servers"
-}
-
-# Access Key
-variable "backend_key_pair_name" {
-  type        = string
-  default     = "backend"
-  description = "Name of the SSH key pair for the backend instance access"
-}
-
-variable "backend_public_key_path" {
-  description = "Path to the public SSH key for Backend"
-  type        = string
-  default     = "keys/backend.pub"
-}
-
-# Access Key
-variable "frontend_key_pair_name" {
-  type        = string
-  default     = "frontend"
-  description = "Name of the SSH key pair for the frontend instance access"
-}
-
-variable "frontend_public_key_path" {
-  description = "Path to the public SSH key for Frontend"
-  type        = string
-  default     = "keys/frontend.pub"
-}
-
-# S3 Bucket
-variable "s3_bucket_name" {
-  description = "Name tag for the S3 Bucket (should be unique)"
-  type        = string
-  default     = "provedcode-s3-bucket"
-}
-
-# IAM User
-variable "user_name" {
-  description = "Name tag for the backend user"
-  type        = string
-  default     = "backend_s3_user"
-}
-
-# IAM Policy
-variable "policy_name" {
-  description = "Name tag for the IAM Policy"
-  type        = string
-  default     = "s3_bucket_access"
-}
-
-# SSM Parameters
-variable "ssm_secret_key_name" {
-  description = "Name for the SSM parameter storing the secret access key"
-  type        = string
-  default     = "/myapp/s3/secret_access_key"
-}
-
-variable "ssm_secret_key_description" {
-  description = "Description for the SSM parameter storing the secret access key"
-  type        = string
-  default     = "Provide an access to the S3 Bucket"
-}
-
-variable "ssm_access_key_name" {
-  description = "Name for the SSM parameter storing the access key id"
-  type        = string
-  default     = "/myapp/s3/access_key_id"
-}
-
-variable "ssm_access_key_description" {
-  description = "Description for the SSM parameter storing the access key id"
-  type        = string
-  default     = "Provide an access to the S3 Bucket"
-}
-
-
-# Edge-Gateway
-
-variable "edge_gateway_instance_name" {
-  description = "Name for the instance that serves as both a bastion host and a reverse proxy"
-  type        = string
-  default     = "edge-gateway"
-}
-
-variable "edge_gateway_sg_name" {
-  description = "The name of the edge-gateway Security Group"
-  type        = string
-  default     = "edge-gateway-sg"
-}
-
-# Access Key
-variable "edge_gateway_key_pair_name" {
-  type        = string
-  default     = "edge-gateway-key"
-  description = "Name of the SSH key pair for the bastion instance access"
-}
-
-variable "edge_gateway_public_key_path" {
-  description = "Path to the public SSH key for Edge Gateway"
-  type        = string
-  default     = "keys/edge-gateway.pub"
-}
-
-# Database
-
-# Database User
-variable "db_username" {
-  description = "Username for the database"
-  type        = string
-}
-
-# Database Password
-variable "db_password" {
-  description = "Password for the database"
-  type        = string
-  sensitive   = true
-}
-
-variable "db_engine_version" {
-  description = "Version of the database engine"
-  type        = string
-  default     = "17.5"
-}
-
-variable "db_instance_class" {
-  description = "Type of the Database instance image"
-  type        = string
-  default     = "db.t4g.micro"
-}
-
-variable "db_identifier" {
-  description = "Unique database identifier"
-  type        = string
-  default     = "provedcode-database"
-}
-

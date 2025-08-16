@@ -25,36 +25,30 @@ provider "aws" {
 module "network" {
   source = "./modules/network"
 
-  # VPC
-  vpc_cidr_block   = "10.0.0.0/16"
-  vpc_dns_support  = true
-  vpc_dns_hostnames = true
-  vpc_name         = "provedcode-vpc"
+  vpc_cidr_block   = var.vpc_cidr_block
+  vpc_dns_support  = var.vpc_dns_support
+  vpc_dns_hostnames = var.vpc_dns_hostnames
+  vpc_name         = var.vpc_name
 
-  # Internet Gateway
-  igw_name = "provedcode-internet-gateway"
+  igw_name = var.igw_name
 
-  # Public Subnet
-  public_subnet_cidr_block = "10.0.1.0/24"
-  public_subnet_az         = "eu-central-1a"
-  map_public_ip            = true
-  public_subnet_name       = "public-subnet"
+  public_subnet_cidr_block = var.public_subnet_cidr_block
+  public_subnet_az         = var.public_subnet_az
+  map_public_ip            = var.map_public_ip
+  public_subnet_name       = var.public_subnet_name
 
-  # Private Subnets
-  private_subnet_az_1       = "eu-central-1a"
-  private_subnet_az_2       = "eu-central-1b"
-  private_subnet_cidr_block_1 = "10.0.2.0/24"
-  private_subnet_cidr_block_2 = "10.0.3.0/24"
-  private_subnet_name       = "private-subnet"
+  private_subnet_az_1       = var.private_subnet_az_1
+  private_subnet_az_2       = var.private_subnet_az_2
+  private_subnet_cidr_block_1 = var.private_subnet_cidr_block_1
+  private_subnet_cidr_block_2 = var.private_subnet_cidr_block_2
+  private_subnet_name       = var.private_subnet_name
 
-  # Route Tables
-  public_route_table_cidr  = "0.0.0.0/0"
-  public_route_table_name  = "public-route-table"
-  private_route_table_name = "private-route-table"
+  public_route_table_cidr  = var.public_route_table_cidr
+  public_route_table_name  = var.public_route_table_name
+  private_route_table_name = var.private_route_table_name
 
-  # VPC Endpoint
-  vpc_endpoint_service_name = "com.amazonaws.eu-central-1.s3"
-  vpc_endpoint_type         = "Gateway"
+  vpc_endpoint_service_name = var.vpc_endpoint_service_name
+  vpc_endpoint_type         = var.vpc_endpoint_type
 }
 
 

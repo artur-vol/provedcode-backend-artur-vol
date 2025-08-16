@@ -29,3 +29,13 @@ output "private_route_table_id" {
 output "db_subnet_group_name" {
   value = aws_db_subnet_group.this.name
 }
+
+# Private Subnet 1 CIDR
+output "private_subnet_cidr_block_1" {
+  value = aws_subnet.private_1.cidr_block
+}
+
+# Private Subnet 2 CIDR
+output "private_subnet_cidr_block_2" {
+  value = aws_subnet.private_2.cidr_block
+}

@@ -96,18 +96,18 @@ module "database" {
 module "edge_gateway" {
   source = "./modules/edge_gateway"
 
-  vpc_id    = var.edge_vpc_id
-  subnet_id = var.edge_subnet_id
+  vpc_id    = module.network.vpc_id
+  subnet_id = module.network.public_subnet_id
 
-  private_subnet_cidr_block_1 = var.edge_private_subnet_cidr_block_1
-  private_subnet_cidr_block_2 = var.edge_private_subnet_cidr_block_2
-  private_route_table_id      = var.edge_private_route_table_id
+  private_subnet_cidr_block_1 = module.network.private_subnet_ids[0]
+  private_subnet_cidr_block_2 = module.network.private_subnet_ids[1]
+  private_route_table_id      = module.network.private_route_table_id
 
   edge_gateway_sg_name         = var.edge_sg_name
   edge_gateway_sg_revoke_rules = var.edge_sg_revoke_rules
   allowed_http_cidrs           = var.allowed_http_cidrs
   allowed_https_cidrs          = var.allowed_https_cidrs
-  allowed_ssh_cidrs            = ["178.212.243.25/32"]
+  allowed_ssh_cidrs            = var.allowed_ssh_cidrs
 
   instance_ami               = var.edge_instance_ami
   instance_type              = var.edge_instance_type
@@ -122,10 +122,10 @@ module "edge_gateway" {
 module "frontend" {
   source = "./modules/frontend"
 
-  vpc_id    = var.frontend_vpc_id
-  subnet_id = var.frontend_subnet_id
+  vpc_id    = module.network.vpc_id
+  subnet_id = module.network.private_subnet_ids[0]
 
-  edge_gateway_sg_id = var.frontend_edge_gateway_sg_id
+  edge_gateway_sg_id = module.edge_gateway.edge_gateway_sg_id
 
   frontend_sg_name         = var.frontend_sg_name
   frontend_sg_revoke_rules = var.frontend_sg_revoke_rules
@@ -146,11 +146,11 @@ module "frontend" {
 module "backend" {
   source = "./modules/backend"
 
-  vpc_id    = var.backend_vpc_id
-  subnet_id = var.backend_subnet_id
+  vpc_id    = module.network.vpc_id
+  subnet_id = module.network.private_subnet_ids[0]
 
-  edge_gateway_sg_id = var.backend_edge_gateway_sg_id
-  frontend_sg_id     = var.backend_frontend_sg_id
+  edge_gateway_sg_id = module.edge_gateway.edge_gateway_sg_id
+  frontend_sg_id     = module.frontend.frontend_sg_id
 
   backend_sg_name         = var.backend_sg_name
   backend_sg_revoke_rules = var.backend_sg_revoke_rules

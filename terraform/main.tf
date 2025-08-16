@@ -75,21 +75,19 @@ module "storage" {
 module "database" {
   source = "./modules/database"
 
-  # Subnet Group
   db_subnet_group_name = module.network.db_subnet_group_name
 
-  # RDS configs
-  db_engine         = "postgres"
-  db_engine_version = "17.5"
-  db_identifier     = "provedcode-database"
-  db_instance_class = "db.t4g.micro"
+  db_engine         = var.db_engine
+  db_engine_version = var.db_engine_version
+  db_identifier     = var.db_identifier
+  db_instance_class = var.db_instance_class
   db_username       = "change me!!!"
   db_password       = "change me!!!"
 
-  db_allocated_storage = 20
-  skip_final_snapshot  = true
-  storage_encrypted    = false
-  apply_immediately    = true
+  db_allocated_storage = var.db_allocated_storage
+  skip_final_snapshot  = var.skip_final_snapshot
+  storage_encrypted    = var.storage_encrypted
+  apply_immediately    = var.apply_immediately
 }
 
 

@@ -1,5 +1,8 @@
 # variables.tf
 
+
+# Network Module
+
 # VPC
 variable "vpc_cidr_block" {
   description = "CIDR block for the VPC"
@@ -121,6 +124,8 @@ variable "vpc_endpoint_type" {
 }
 
 
+# Storage Module
+
 # S3 Bucket
 variable "s3_bucket_name" {
   description = "Base name for the S3 bucket"
@@ -171,4 +176,62 @@ variable "ssm_secret_key_description" {
   description = "Description for SSM parameter of IAM secret key"
   type        = string
   default     = "Secret key for S3 user"
+}
+
+
+# Database Module
+
+# Subnet Group
+variable "db_subnet_group_name" {
+  description = "Name of the DB subnet group"
+  type        = string
+}
+
+# RDS configs
+variable "db_engine" {
+  description = "Database engine (e.g., postgres)"
+  type        = string
+  default     = "postgres"
+}
+
+variable "db_engine_version" {
+  description = "Database engine version"
+  type        = string
+  default     = "17.5"
+}
+
+variable "db_identifier" {
+  description = "Identifier for the DB instance"
+  type        = string
+  default     = "provedcode-database"
+}
+
+variable "db_instance_class" {
+  description = "Instance class for the DB"
+  type        = string
+  default     = "db.t4g.micro"
+}
+
+variable "db_allocated_storage" {
+  description = "Allocated storage in GB"
+  type        = number
+  default     = 20
+}
+
+variable "skip_final_snapshot" {
+  description = "Whether to skip final snapshot on deletion"
+  type        = bool
+  default     = true
+}
+
+variable "storage_encrypted" {
+  description = "Whether to enable storage encryption"
+  type        = bool
+  default     = false
+}
+
+variable "apply_immediately" {
+  description = "Whether to apply modifications immediately"
+  type        = bool
+  default     = true
 }

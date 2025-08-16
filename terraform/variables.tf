@@ -221,12 +221,6 @@ variable "ssm_secret_key_description" {
 
 # Database Module
 
-# Subnet Group
-# variable "db_subnet_group_name" {
-#   description = "Name of the DB subnet group"
-#   type        = string
-# }
-
 # RDS configs
 variable "db_engine" {
   description = "Database engine (e.g., postgres)"
@@ -279,33 +273,6 @@ variable "apply_immediately" {
 
 # Edge-Gateway Module 
 
-# variable "edge_vpc_id" {
-#   description = "VPC ID for the edge gateway"
-#   type        = string
-# }
-#
-# variable "edge_subnet_id" {
-#   description = "Subnet ID for the edge gateway"
-#   type        = string
-# }
-#
-# variable "edge_private_subnet_cidr_block_1" {
-#   description = "CIDR block of first private subnet"
-#   type        = string
-#   default     = "10.0.2.0/24"
-# }
-#
-# variable "edge_private_subnet_cidr_block_2" {
-#   description = "CIDR block of second private subnet"
-#   type        = string
-#   default     = "10.0.3.0/24"
-# }
-#
-# variable "edge_private_route_table_id" {
-#   description = "Private route table ID for NAT"
-#   type        = string
-# }
-#
 variable "edge_sg_name" {
   description = "Name of the edge gateway security group"
   type        = string
@@ -356,21 +323,6 @@ variable "edge_key_pair_name" {
 
 
 # Frontend Module
-#
-# variable "frontend_vpc_id" {
-#   description = "VPC ID where frontend will be deployed"
-#   type        = string
-# }
-#
-# variable "frontend_subnet_id" {
-#   description = "Subnet ID for the frontend instance"
-#   type        = string
-# }
-#
-# variable "frontend_edge_gateway_sg_id" {
-#   description = "Security Group ID of the edge gateway for SSH access"
-#   type        = string
-# }
 
 variable "frontend_sg_name" {
   description = "Name for the frontend security group"
@@ -410,26 +362,6 @@ variable "frontend_instance_name" {
 
 
 # Backend Module
-#
-# variable "backend_vpc_id" {
-#   description = "VPC ID where backend will be deployed"
-#   type        = string
-# }
-#
-# variable "backend_subnet_id" {
-#   description = "Subnet ID for the backend instance"
-#   type        = string
-# }
-#
-# variable "backend_edge_gateway_sg_id" {
-#   description = "Security Group ID of the edge gateway for SSH access"
-#   type        = string
-# }
-
-# variable "backend_frontend_sg_id" {
-#   description = "Security Group ID of the frontend to allow backend access"
-#   type        = string
-# }
 
 variable "backend_sg_name" {
   description = "Name for the backend security group"

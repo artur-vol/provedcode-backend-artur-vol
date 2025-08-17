@@ -1,3 +1,4 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # defaults file for edge-gateway
+wan_interface: "{{ ansible_default_ipv4.interface }}"

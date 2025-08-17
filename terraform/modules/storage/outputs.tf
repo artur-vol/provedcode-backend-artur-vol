@@ -14,6 +14,11 @@ output "bucket_name" {
   value       = aws_s3_bucket.this.bucket
 }
 
+output "bucket_region" {
+  description = "AWS region of the S3 bucket"
+  value       = aws_s3_bucket.this.region
+}
+
 
 # IAM User Parameters
 

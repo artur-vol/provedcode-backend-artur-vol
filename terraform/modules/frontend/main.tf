@@ -15,6 +15,8 @@ resource "aws_security_group" "frontend" {
   }
 }
 
+# Inbound Rules
+
 # Allow HTTP traffic
 resource "aws_security_group_rule" "frontend_http" {
   type              = "ingress"
@@ -37,7 +39,7 @@ resource "aws_security_group_rule" "frontend_https" {
   security_group_id = aws_security_group.frontend.id
 }
 
-# Allow SSH from Edge Gateway
+# Allow SSH Access from Edge Gateway
 resource "aws_security_group_rule" "frontend_ssh" {
   type                     = "ingress"
   from_port                = 22
@@ -47,6 +49,19 @@ resource "aws_security_group_rule" "frontend_ssh" {
   description              = "Allow SSH access from Edge Gateway"
   source_security_group_id = var.edge_gateway_sg_id
 }
+
+# Allow Frontend App Traffic from Edge Gateway
+resource "aws_security_group_rule" "frontend_from_edge_gateway" {
+  type                     = "ingress"
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.frontend.id
+  description              = "Allow Frontend app traffic from Edge Gateway"
+  source_security_group_id = var.edge_gateway_sg_id
+}
+
+# Outbound Rules
 
 # Allow all outbound traffic
 resource "aws_security_group_rule" "frontend_egress_all" {

@@ -119,6 +119,6 @@ resource "aws_vpc_endpoint" "this" {
 
 # VPC Endpoint and Route Table Association
 resource "aws_vpc_endpoint_route_table_association" "this" {
- route_table_id  = aws_route_table.private.id
- vpc_endpoint_id = aws_vpc_endpoint.this.id
+  route_table_id  = aws_route_table.private.id
+  vpc_endpoint_id = aws_vpc_endpoint.this.id
 }

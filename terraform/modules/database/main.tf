@@ -20,12 +20,12 @@ resource "aws_db_instance" "this" {
 
 # RDS Security Group
 resource "aws_security_group" "database" {
-  name        = var.database_sg_name
+  name        = var.db_sg_name
   description = "Security group for database server"
   vpc_id      = var.vpc_id
 
   tags = {
-    Name = var.database_sg_name
+    Name = var.db_sg_name
   }
 }
 

@@ -75,6 +75,7 @@ module "storage" {
 module "database" {
   source = "./modules/database"
 
+  vpc_id               = module.network.vpc_id
   db_subnet_group_name = module.network.db_subnet_group_name
 
   db_engine         = var.db_engine
@@ -88,6 +89,9 @@ module "database" {
   skip_final_snapshot  = var.skip_final_snapshot
   storage_encrypted    = var.storage_encrypted
   apply_immediately    = var.apply_immediately
+
+  db_sg_name    = var.db_sg_name
+  backend_sg_id = module.backend.backend_sg_id
 }
 
 

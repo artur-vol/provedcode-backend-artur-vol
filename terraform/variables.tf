@@ -270,6 +270,14 @@ variable "apply_immediately" {
   default     = true
 }
 
+# RDS Security Group
+
+variable "db_sg_name" {
+  description = "Name for the frontend security group"
+  type        = string
+  default     = "database-security-group"
+}
+
 
 # Edge-Gateway Module 
 

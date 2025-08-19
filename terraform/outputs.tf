@@ -25,13 +25,13 @@ output "private_subnet_cidr_block_2" {
 output "db_login" {
   description = "Database username for backend"
   value       = module.database.db_login
-  sensitive = true
+  sensitive   = true
 }
 
 output "db_password" {
   description = "Database password for backend"
   value       = module.database.db_password
-  sensitive = true
+  sensitive   = true
 }
 
 output "db_url" {
@@ -50,7 +50,7 @@ output "s3_access_key" {
 output "s3_secret_key" {
   description = "S3 secret key for backend"
   value       = module.storage.iam_secret_key
-  sensitive = true
+  sensitive   = true
 }
 
 output "s3_region" {

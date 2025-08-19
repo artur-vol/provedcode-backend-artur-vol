@@ -64,3 +64,26 @@ variable "apply_immediately" {
   type        = bool
   default     = true
 }
+
+
+# Security Group
+
+variable "db_sg_name" {
+  description = "Name for the frontend security group"
+  type        = string
+}
+
+variable "backend_sg_id" {
+  description = "Security Group ID of the backend to allow access"
+  type        = string
+}
+
+
+# Virtual Private Network
+
+variable "vpc_id" {
+  description = "VPC ID where backend will be deployed"
+  type        = string
+}
+
+

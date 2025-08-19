@@ -15,6 +15,8 @@ resource "aws_security_group" "backend" {
   }
 }
 
+# Inbound rules
+
 # Allow access from frontend SG
 resource "aws_security_group_rule" "backend_from_frontend" {
   type                     = "ingress"
@@ -22,7 +24,7 @@ resource "aws_security_group_rule" "backend_from_frontend" {
   to_port                  = 8080
   protocol                 = "tcp"
   security_group_id        = aws_security_group.backend.id
-  description              = "Allow backend access from frontend SG"
+  description              = "Allow Backend access from Frontend Security Group"
   source_security_group_id = var.frontend_sg_id
 }
 
@@ -33,9 +35,22 @@ resource "aws_security_group_rule" "backend_ssh" {
   to_port                  = 22
   protocol                 = "tcp"
   security_group_id        = aws_security_group.backend.id
-  description              = "Allow SSH access from Edge Gateway"
+  description              = "Allow SSH access from Edge Gateway Security Group"
   source_security_group_id = var.edge_gateway_sg_id
 }
+
+# Allow backend access from Edge Gateway
+resource "aws_security_group_rule" "backend_from_edge_gateway" {
+  type                     = "ingress"
+  from_port                = 8080
+  to_port                  = 8080
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.backend.id
+  description              = "Allow Backend access from Edge Gateway Security Group"
+  source_security_group_id = var.edge_gateway_sg_id
+}
+
+# Outbound rules
 
 # Allow all outbound traffic
 resource "aws_security_group_rule" "backend_egress" {

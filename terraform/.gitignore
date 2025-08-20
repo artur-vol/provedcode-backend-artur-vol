@@ -2,3 +2,6 @@
 *.tfstate*
 *.pem
 *backup
+
+*.md
+!README.md

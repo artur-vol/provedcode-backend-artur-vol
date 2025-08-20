@@ -30,6 +30,11 @@ variable "db_instance_class" {
   type        = string
 }
 
+variable "db_name" {
+  description = "Name for the initial database"
+  type        = string
+}
+
 variable "db_username" {
   description = "Master username for the DB"
   type        = string

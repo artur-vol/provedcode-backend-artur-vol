@@ -240,6 +240,12 @@ variable "db_identifier" {
   default     = "provedcode-database"
 }
 
+variable "db_name" {
+  description = "Name of the initial database"
+  type        = string
+  default     = "provedcode"
+}
+
 variable "db_instance_class" {
   description = "Instance class for the DB"
   type        = string

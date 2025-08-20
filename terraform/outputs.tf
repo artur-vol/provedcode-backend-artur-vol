@@ -39,6 +39,11 @@ output "db_url" {
   value       = module.database.db_url
 }
 
+output "db_endpoint" {
+  description = "Database endpoint"
+  value       = module.database.db_endpoint
+}
+
 
 # S3
 

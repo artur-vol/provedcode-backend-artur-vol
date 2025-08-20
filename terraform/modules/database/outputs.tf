@@ -19,6 +19,11 @@ output "db_port" {
   value       = aws_db_instance.this.port
 }
 
+output "db_name" {
+  description = "Name of the initial database"
+  value       = aws_db_instance.this.db_name
+}
+
 output "db_login" {
   description = "Master username for the RDS instance"
   value       = aws_db_instance.this.username
@@ -32,5 +37,6 @@ output "db_password" {
 
 output "db_url" {
   description = "JDBC URL to connect to the database"
-  value       = "jdbc:postgresql://${aws_db_instance.this.endpoint}:${aws_db_instance.this.port}/your_database_name"
+  value       = "jdbc:postgresql://${aws_db_instance.this.endpoint}:${aws_db_instance.this.port}/${aws_db_instance.this.db_name}"
 }
+

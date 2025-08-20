@@ -10,6 +10,7 @@ resource "aws_db_instance" "this" {
   engine_version         = var.db_engine_version
   identifier             = var.db_identifier
   instance_class         = var.db_instance_class
+  db_name                = var.db_name
   username               = var.db_username
   password               = var.db_password
   skip_final_snapshot    = var.skip_final_snapshot

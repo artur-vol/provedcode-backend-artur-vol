@@ -13,6 +13,12 @@ terraform {
       version = "~> 3.5.1"
     }
   }
+
+  backend "s3" {
+    bucket = "remote-tfstate-storage-3da99298c85f82d4"
+    key    = "provedcode/terraform.tfstate"
+    region = "eu-central-1"
+  }
 }
 
 provider "aws" {

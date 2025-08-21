@@ -13,6 +13,12 @@ pipeline {
 
   stages {
 
+    stage('Checkout') {
+      steps {
+        git branch: 'terraform', url: 'https://github.com/artur-vol/provedcode-backend-artur-vol.git'
+      }
+    }
+    
   }
 
 }

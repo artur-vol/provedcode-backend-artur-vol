@@ -88,9 +88,21 @@ resource "aws_instance" "edge_gateway" {
 }
 
 # SSH Key
+resource "tls_private_key" "edge_gateway" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
 resource "aws_key_pair" "edge_gateway" {
   key_name   = var.edge_gateway_key_pair_name
-  public_key = file(var.edge_gateway_public_key_path)
+  public_key = tls_private_key.edge_gateway.public_key_openssh
+}
+
+resource "aws_ssm_parameter" "edge_gateway" {
+  name        = var.edge_gateway_ssh_private_key_ssm_name
+  description = "Private SSH key for edge gateway EC2 instance"
+  type        = "SecureString"
+  value       = tls_private_key.edge_gateway.private_key_openssh
 }
 
 # Edge-Gateway Route
@@ -99,3 +111,4 @@ resource "aws_route" "private_nat" {
   destination_cidr_block = "0.0.0.0/0"
   network_interface_id   = aws_instance.edge_gateway.primary_network_interface_id
 }
+

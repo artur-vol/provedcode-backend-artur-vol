@@ -82,8 +82,8 @@ variable "edge_gateway_key_pair_name" {
   type        = string
 }
 
-variable "edge_gateway_public_key_path" {
-  description = "Path to the public SSH key file for edge gateway"
+variable "edge_gateway_ssh_private_key_ssm_name" {
+  description = "Name of the SSM parameter to store the edge gateway private key"
   type        = string
 }
 

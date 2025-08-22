@@ -125,8 +125,8 @@ module "edge_gateway" {
   instance_type              = var.edge_instance_type
   edge_gateway_instance_name = var.edge_instance_name
 
-  edge_gateway_key_pair_name   = var.edge_key_pair_name
-  edge_gateway_public_key_path = var.edge_gateway_public_key_path
+  edge_gateway_key_pair_name            = var.edge_key_pair_name
+  edge_gateway_ssh_private_key_ssm_name = var.edge_gateway_ssh_private_key_ssm_name
 }
 
 

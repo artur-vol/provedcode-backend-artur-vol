@@ -28,6 +28,12 @@ variable "backend_ssh_private_key_ssm_name" {
   default     = "backend"
 }
 
+variable "edge_gateway_ssh_private_key_ssm_name" {
+  description = "Name of the SSM parameter to store the edge_gateway private key"
+  type        = string
+  default     = "edge_gateway"
+}
+
 variable "allowed_ssh_cidrs" {
   description = "CIDR block fot SSH connections"
   type        = list(string)

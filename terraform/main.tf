@@ -167,8 +167,8 @@ module "backend" {
   backend_sg_name         = var.backend_sg_name
   backend_sg_revoke_rules = var.backend_sg_revoke_rules
 
-  backend_key_pair_name   = var.backend_key_pair_name
-  backend_public_key_path = var.backend_public_key_path
+  backend_key_pair_name            = var.backend_key_pair_name
+  backend_ssh_private_key_ssm_name = var.backend_ssh_private_key_ssm_name
 
   instance_ami          = var.backend_instance_ami
   instance_type         = var.backend_instance_type

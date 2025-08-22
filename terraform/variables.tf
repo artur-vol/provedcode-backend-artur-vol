@@ -20,20 +20,12 @@ variable "db_password" {
   sensitive   = true
 }
 
-# SSH keys paths
-variable "edge_gateway_public_key_path" {
-  description = "Path to the public key for Edge Gateway"
-  type        = string
-}
+# SSH keys names
 
-variable "frontend_public_key_path" {
-  description = "Path to the public key for Frontend"
+variable "backend_ssh_private_key_ssm_name" {
+  description = "Name of the SSM parameter to store the backend private key"
   type        = string
-}
-
-variable "backend_public_key_path" {
-  description = "Path to the public key for Backend"
-  type        = string
+  default     = "backend"
 }
 
 variable "allowed_ssh_cidrs" {

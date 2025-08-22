@@ -63,11 +63,25 @@ resource "aws_security_group_rule" "backend_egress" {
   security_group_id = aws_security_group.backend.id
 }
 
+
 # SSH Key
+resource "tls_private_key" "backend" {
+  algorithm = "RSA"             
+  rsa_bits  = 2048
+}
+
 resource "aws_key_pair" "backend" {
   key_name   = var.backend_key_pair_name
-  public_key = file(var.backend_public_key_path)
+  public_key = tls_private_key.backend.public_key_openssh
 }
+
+resource "aws_ssm_parameter" "backend" {
+  name = var.backend_ssh_private_key_ssm_name
+  description = "Private SSH key for backend EC2 instance"
+  type = "SecureString" 
+  value = tls_private_key.backend.private_key_openssh
+}
+
 
 # EC2 Instance
 resource "aws_instance" "backend" {

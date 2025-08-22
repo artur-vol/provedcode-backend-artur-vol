@@ -56,13 +56,13 @@ variable "egress_cidrs" {
 
 # SSH
 
-variable "backend_key_pair_name" {
-  description = "Name of the SSH key pair for backend"
+variable "backend_ssh_private_key_ssm_name" {
+  description = "Name of the SSM parameter to store the backend private key"
   type        = string
 }
 
-variable "backend_public_key_path" {
-  description = "Path to the public SSH key file for backend"
+variable "backend_key_pair_name" {
+  description = "Name of the SSH key pair for backend"
   type        = string
 }
 

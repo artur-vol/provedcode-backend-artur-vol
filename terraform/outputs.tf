@@ -81,6 +81,12 @@ output "edge_gateway_private_ip" {
   value       = module.edge_gateway.edge_gateway_private_ip
 }
 
+output "edge_gateway_private_key" {
+  description = "Private SSH key for edge_gateway instance (PEM format)"
+  value       = module.edge_gateway.edge_gateway_private_key
+  sensitive   = true
+}
+
 
 # Backend
 
@@ -89,12 +95,24 @@ output "backend_private_ip" {
   value       = module.backend.backend_private_ip
 }
 
+output "backend_private_key" {
+  description = "Private SSH key for backend instance (PEM format)"
+  value       = module.backend.backend_private_key
+  sensitive   = true
+}
+
 
 # Frontend
 
 output "frontend_private_ip" {
   description = "Private IP of the frontend instance"
   value       = module.frontend.frontend_private_ip
+}
+
+output "frontend_private_key" {
+  description = "Private SSH key for frontend instance (PEM format)"
+  value       = module.frontend.frontend_private_key
+  sensitive   = true
 }
 
 

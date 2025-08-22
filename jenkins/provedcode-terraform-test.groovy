@@ -9,6 +9,13 @@ pipeline {
         AWS_DEFAULT_REGION = "${params.REGION}"
     }
     stages {
+        // FRONTEND
+        stage('Checkout Frontend Repo') {
+          steps {
+            git branch: 'main', url: 'https://github.com/artur-vol/provedcode-frontend-artur-vol.git'
+          }
+        }
+        // TERRAFORM
         stage('Checkout') {
             steps {
                 git branch: 'terraform', url: 'https://github.com/artur-vol/provedcode-backend-artur-vol.git'
@@ -30,5 +37,3 @@ pipeline {
         }
     }
 }
-
-

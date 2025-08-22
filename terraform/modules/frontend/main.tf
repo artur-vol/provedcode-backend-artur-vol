@@ -75,9 +75,21 @@ resource "aws_security_group_rule" "frontend_egress_all" {
 }
 
 # SSH Key
+resource "tls_private_key" "frontend" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
 resource "aws_key_pair" "frontend" {
   key_name   = var.frontend_key_pair_name
-  public_key = file(var.frontend_public_key_path)
+  public_key = tls_private_key.frontend.public_key_openssh
+}
+
+resource "aws_ssm_parameter" "frontend" {
+  name        = var.frontend_ssh_private_key_ssm_name
+  description = "Private SSH key for edge gateway EC2 instance"
+  type        = "SecureString"
+  value       = tls_private_key.frontend.private_key_openssh
 }
 
 # EC2 Instance

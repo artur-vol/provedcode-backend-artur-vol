@@ -62,8 +62,8 @@ variable "frontend_key_pair_name" {
   type        = string
 }
 
-variable "frontend_public_key_path" {
-  description = "Path to the public SSH key file for frontend"
+variable "frontend_ssh_private_key_ssm_name" {
+  description = "Name of the SSM parameter to store the edge gateway private key"
   type        = string
 }
 

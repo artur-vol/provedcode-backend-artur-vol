@@ -144,8 +144,8 @@ module "frontend" {
   allowed_http_cidrs       = var.allowed_http_cidrs
   allowed_https_cidrs      = var.allowed_https_cidrs
 
-  frontend_key_pair_name   = var.frontend_key_pair_name
-  frontend_public_key_path = var.frontend_public_key_path
+  frontend_key_pair_name            = var.frontend_key_pair_name
+  frontend_ssh_private_key_ssm_name = var.frontend_ssh_private_key_ssm_name
 
   instance_ami           = var.frontend_instance_ami
   instance_type          = var.frontend_instance_type

@@ -90,7 +90,6 @@ variable "edge_gateway_ssh_private_key_ssm_name" {
 variable "edge_gateway_public_key" {
   type        = string
   description = "Public SSH key for edge gateway"
-  sensitive   = true
 }
 
 variable "edge_gateway_private_key" {

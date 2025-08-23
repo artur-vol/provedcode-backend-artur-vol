@@ -69,7 +69,6 @@ variable "backend_key_pair_name" {
 variable "backend_public_key" {
   type        = string
   description = "Public SSH key for backend"
-  sensitive   = true
 }
 
 variable "backend_private_key" {

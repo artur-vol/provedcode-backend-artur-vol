@@ -48,7 +48,6 @@ variable "allowed_ssh_cidrs" {
 variable "edge_gateway_public_key" {
   type        = string
   description = "Public SSH key for edge gateway"
-  sensitive   = true
 }
 
 variable "edge_gateway_private_key" {
@@ -60,7 +59,6 @@ variable "edge_gateway_private_key" {
 variable "backend_public_key" {
   type        = string
   description = "Public SSH key for backend"
-  sensitive   = true
 }
 
 variable "backend_private_key" {
@@ -72,7 +70,6 @@ variable "backend_private_key" {
 variable "frontend_public_key" {
   type        = string
   description = "Public SSH key for frontend"
-  sensitive   = true
 }
 
 variable "frontend_private_key" {

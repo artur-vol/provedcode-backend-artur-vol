@@ -96,11 +96,3 @@ output "frontend_private_ip" {
   description = "Private IP of the frontend instance"
   value       = module.frontend.frontend_private_ip
 }
-
-output "frontend_private_key" {
-  description = "Private SSH key for frontend instance (PEM format)"
-  value       = module.frontend.frontend_private_key
-  sensitive   = true
-}
-
-

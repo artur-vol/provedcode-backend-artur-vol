@@ -148,6 +148,8 @@ module "frontend" {
 
   frontend_key_pair_name            = var.frontend_key_pair_name
   frontend_ssh_private_key_ssm_name = var.frontend_ssh_private_key_ssm_name
+  frontend_public_key               = var.frontend_public_key
+  frontend_private_key              = var.frontend_private_key
 
   instance_ami           = var.frontend_instance_ami
   instance_type          = var.frontend_instance_type

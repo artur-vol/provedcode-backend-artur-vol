@@ -24,17 +24,6 @@ output "frontend_sg_id" {
 
 # Frontend SSH
 
-output "frontend_private_key" {
-  description = "Private SSH key for frontend instance (PEM format)"
-  value       = tls_private_key.frontend.private_key_openssh
-  sensitive   = true
-}
-
-output "frontend_public_key" {
-  description = "Public SSH key for frontend instance"
-  value       = tls_private_key.frontend.public_key_openssh
-}
-
 output "frontend_key_pair_name" {
   description = "Name of the AWS EC2 key pair created for frontend"
   value       = aws_key_pair.frontend.key_name

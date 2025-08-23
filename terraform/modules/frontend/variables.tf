@@ -57,14 +57,26 @@ variable "egress_cidrs" {
 
 # SSH
 
+variable "frontend_ssh_private_key_ssm_name" {
+  description = "Name of the SSM parameter to store the frontend private key"
+  type        = string
+}
+
 variable "frontend_key_pair_name" {
   description = "Name of the SSH key pair for frontend"
   type        = string
 }
 
-variable "frontend_ssh_private_key_ssm_name" {
-  description = "Name of the SSM parameter to store the edge gateway private key"
+variable "frontend_public_key" {
   type        = string
+  description = "Public SSH key for frontend"
+  sensitive   = true
+}
+
+variable "frontend_private_key" {
+  type        = string
+  description = "Private SSH key for frontend"
+  sensitive   = true
 }
 
 

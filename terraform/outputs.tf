@@ -81,12 +81,6 @@ output "edge_gateway_private_ip" {
   value       = module.edge_gateway.edge_gateway_private_ip
 }
 
-output "edge_gateway_private_key" {
-  description = "Private SSH key for edge_gateway instance (PEM format)"
-  value       = module.edge_gateway.edge_gateway_private_key
-  sensitive   = true
-}
-
 
 # Backend
 

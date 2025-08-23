@@ -127,6 +127,8 @@ module "edge_gateway" {
 
   edge_gateway_key_pair_name            = var.edge_key_pair_name
   edge_gateway_ssh_private_key_ssm_name = var.edge_gateway_ssh_private_key_ssm_name
+  edge_gateway_public_key               = var.edge_gateway_public_key
+  edge_gateway_private_key              = var.edge_gateway_private_key
 }
 
 

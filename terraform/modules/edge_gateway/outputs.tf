@@ -30,17 +30,6 @@ output "edge_gateway_sg_id" {
 
 # Edge-Gateway SSH
 
-output "edge_gateway_private_key" {
-  description = "Private SSH key for edge_gateway instance (PEM format)"
-  value       = tls_private_key.edge_gateway.private_key_openssh
-  sensitive   = true
-}
-
-output "edge_gateway_public_key" {
-  description = "Public SSH key for edge_gateway instance"
-  value       = tls_private_key.edge_gateway.public_key_openssh
-}
-
 output "edge_gateway_key_pair_name" {
   description = "Name of the AWS EC2 key pair created for edge_gateway"
   value       = aws_key_pair.edge_gateway.key_name

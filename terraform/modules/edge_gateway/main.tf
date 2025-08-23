@@ -85,6 +85,7 @@ resource "aws_instance" "edge_gateway" {
   }
 
   # user_data = file("${path.module}/nat_setup.sh")
+  depends_on = [aws_key_pair.edge_gateway]
 }
 
 # SSH Key

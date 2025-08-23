@@ -10,9 +10,20 @@ pipeline {
     AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
     AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
     AWS_DEFAULT_REGION = "eu-central-1"
+
     TF_VAR_db_username = credentials('db_username')
     TF_VAR_db_password = credentials('db_password')
+
     TF_VAR_allowed_ssh_cidrs = credentials('allowed-ssh-cidrs')
+
+    TF_VAR_edge_gateway_private_key = credentials('edge_gateway_private_key')
+    TF_VAR_edge_gateway_public_key = credentials('edge_gateway_private_key')
+
+    TF_VAR_backend_private_key = credentials('backend_private_key')
+    TF_VAR_backend_public_key = credentials('backend_private_key')
+
+    TF_VAR_frontend_private_key = credentials('frontend_private_key')
+    TF_VAR_frontend_public_key = credentials('frontend_private_key')
   }
 
   stages {

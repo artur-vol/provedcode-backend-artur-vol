@@ -17,13 +17,13 @@ pipeline {
     TF_VAR_allowed_ssh_cidrs = credentials('allowed-ssh-cidrs')
 
     TF_VAR_edge_gateway_private_key = credentials('edge_gateway_private_key')
-    TF_VAR_edge_gateway_public_key = credentials('edge_gateway_private_key')
+    TF_VAR_edge_gateway_public_key = credentials('edge_gateway_public_key')
 
     TF_VAR_backend_private_key = credentials('backend_private_key')
-    TF_VAR_backend_public_key = credentials('backend_private_key')
+    TF_VAR_backend_public_key = credentials('backend_public_key')
 
     TF_VAR_frontend_private_key = credentials('frontend_private_key')
-    TF_VAR_frontend_public_key = credentials('frontend_private_key')
+    TF_VAR_frontend_public_key = credentials('frontend_public_key')
   }
 
   stages {

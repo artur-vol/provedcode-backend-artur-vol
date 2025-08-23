@@ -56,6 +56,20 @@ variable "edge_gateway_private_key" {
   description = "Private SSH key for edge gateway"
   sensitive   = true
 }
+
+variable "backend_public_key" {
+  type        = string
+  description = "Public SSH key for backend"
+  sensitive   = true
+}
+
+variable "backend_private_key" {
+  type        = string
+  description = "Private SSH key for backend"
+  sensitive   = true
+}
+
+
 # Network Module
 
 # VPC

@@ -171,6 +171,8 @@ module "backend" {
 
   backend_key_pair_name            = var.backend_key_pair_name
   backend_ssh_private_key_ssm_name = var.backend_ssh_private_key_ssm_name
+  backend_public_key               = var.backend_public_key
+  backend_private_key              = var.backend_private_key
 
   instance_ami          = var.backend_instance_ami
   instance_type         = var.backend_instance_type

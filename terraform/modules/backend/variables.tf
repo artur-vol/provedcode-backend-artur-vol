@@ -66,6 +66,18 @@ variable "backend_key_pair_name" {
   type        = string
 }
 
+variable "backend_public_key" {
+  type        = string
+  description = "Public SSH key for backend"
+  sensitive   = true
+}
+
+variable "backend_private_key" {
+  type        = string
+  description = "Private SSH key for backend"
+  sensitive   = true
+}
+
 
 # Backend EC2 Instance
 

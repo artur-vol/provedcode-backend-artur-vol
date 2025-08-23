@@ -89,12 +89,6 @@ output "backend_private_ip" {
   value       = module.backend.backend_private_ip
 }
 
-output "backend_private_key" {
-  description = "Private SSH key for backend instance (PEM format)"
-  value       = module.backend.backend_private_key
-  sensitive   = true
-}
-
 
 # Frontend
 

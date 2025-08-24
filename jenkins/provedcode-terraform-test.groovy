@@ -64,6 +64,32 @@ pipeline {
             }
           }
         }
+        stage('Generate Inventory') {
+          steps {
+            dir('terraform') {
+              sh 'terraform output -json > tf_output.json'
+            }
+            script {
+              def tfOutput = readJSON file: 'terraform/tf_output.json'
+              def edgeGatewayIp = tfOutput.edge_gateway_private_ip.value
+              def backendIp    = tfOutput.backend_private_ip.value
+              def frontendIp   = tfOutput.frontend_private_ip.value
+
+              def inventory = """
+[edge]
+${edgeGatewayIp} ansible_user=ubuntu ansible_ssh_private_key_file=${TF_VAR_edge_gateway_private_key}
+
+[backend]
+${backendIp} ansible_user=ubuntu ansible_ssh_private_key_file=${TF_VAR_backend_private_key}
+
+[frontend]
+${frontendIp} ansible_user=ubuntu ansible_ssh_private_key_file=${TF_VAR_frontend_private_key}
+"""
+
+              writeFile file: 'inventory.ini', text: inventory
+            }
+          }
+        }
       }
     }
 
@@ -127,6 +153,6 @@ pipeline {
         }
       }
     }
-
   }
 }
+

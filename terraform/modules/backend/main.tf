@@ -75,6 +75,10 @@ resource "aws_ssm_parameter" "backend" {
   type        = "SecureString"
   value       = var.backend_private_key
   tier        = "Standard"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 # EC2 Instance

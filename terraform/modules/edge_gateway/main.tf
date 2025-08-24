@@ -100,6 +100,10 @@ resource "aws_ssm_parameter" "edge_gateway" {
   type        = "SecureString"
   value       = var.edge_gateway_private_key
   tier        = "Standard"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 # Edge-Gateway Route

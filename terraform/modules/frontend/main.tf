@@ -87,6 +87,10 @@ resource "aws_ssm_parameter" "frontend" {
   type        = "SecureString"
   value       = var.frontend_private_key
   tier        = "Standard"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 

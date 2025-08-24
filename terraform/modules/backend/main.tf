@@ -74,6 +74,7 @@ resource "aws_ssm_parameter" "backend" {
   description = "Private SSH key for backend EC2 instance"
   type        = "SecureString"
   value       = var.backend_private_key
+  tier        = "Standard"
 }
 
 # EC2 Instance

@@ -86,6 +86,7 @@ resource "aws_ssm_parameter" "frontend" {
   description = "Private SSH key for frontend EC2 instance"
   type        = "SecureString"
   value       = var.frontend_private_key
+  tier        = "Standard"
 }
 
 

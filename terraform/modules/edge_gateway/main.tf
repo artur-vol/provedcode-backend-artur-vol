@@ -99,6 +99,7 @@ resource "aws_ssm_parameter" "edge_gateway" {
   description = "Private SSH key for edge gateway EC2 instance"
   type        = "SecureString"
   value       = var.edge_gateway_private_key
+  tier        = "Standard"
 }
 
 # Edge-Gateway Route

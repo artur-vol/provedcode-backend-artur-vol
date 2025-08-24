@@ -1,6 +1,5 @@
-#SPDX-License-Identifier: MIT-0
 # tasks file for edge-gateway
-# ---
+---
 - name: Ensure IP forwarding in the current session
   ansible.builtin.sysctl:
     name: net.ipv4.ip_forward
@@ -19,7 +18,7 @@
 
 - name: Set WAN interface fact dynamically if not set
   ansible.builtin.set_fact:
-    wan_if: "{{ wan_interface | default(ansible_default_ipv4.interface) }}"
+    wan_if: "{{ default(ansible_default_ipv4.interface) }}"
 
 - name: Allow forwarding from LAN to WAN
   ansible.builtin.iptables:

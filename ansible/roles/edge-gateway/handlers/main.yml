@@ -1,5 +1,5 @@
 # handlers file for edge-gateway
 ---
-- name: save iptables rules
+- name: Save iptables rules
   ansible.builtin.command: netfilter-persistent save
   become: true

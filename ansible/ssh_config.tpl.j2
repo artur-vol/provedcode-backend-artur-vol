@@ -1,0 +1,22 @@
+Host bastion
+  HostName {{ bastion_ip }}
+  User ubuntu
+  IdentityFile {{ workspace }}/.ssh/edge_gateway_key.pem
+  UserKnownHostsFile {{ workspace }}/.ssh/known_hosts
+  StrictHostKeyChecking no
+
+Host backend
+  HostName {{ backend_ip }}
+  User ubuntu
+  IdentityFile {{ workspace }}/.ssh/backend_key.pem
+  ProxyJump bastion
+  UserKnownHostsFile {{ workspace }}/.ssh/known_hosts
+  StrictHostKeyChecking no
+
+Host frontend
+  HostName {{ frontend_ip }}
+  User ubuntu
+  IdentityFile {{ workspace }}/.ssh/frontend_key.pem
+  ProxyJump bastion
+  UserKnownHostsFile {{ workspace }}/.ssh/known_hosts
+  StrictHostKeyChecking no

@@ -1,9 +1,9 @@
 ---
-- hosts: bastion
+- hosts: edge
   become: true
   tasks:
     - name: Enable IP forwarding (runtime)
-      ansible.posix.sysctl:
+      ansible.builtin.sysctl:
         name: net.ipv4.ip_forward
         value: '1'
         state: present
@@ -30,7 +30,7 @@
       notify: save iptables rules
 
     - name: Allow established/related return traffic
-      ansible.posix.iptables:
+      ansible.builtin.iptables:
         chain: FORWARD
         in_interface: "{{ wan_if }}"
         ctstate: ESTABLISHED,RELATED
@@ -39,7 +39,7 @@
       notify: save iptables rules
 
     - name: Enable NAT masquerade on WAN
-      ansible.posix.iptables:
+      ansible.builtin.iptables:
         table: nat
         chain: POSTROUTING
         out_interface: "{{ wan_if }}"
@@ -58,27 +58,27 @@
       ansible.builtin.command: netfilter-persistent save
       become: true
 
-# - hosts: backend
-#   become: true
-#   tasks:
-#     - name: Update apt cache
-#       ansible.builtin.apt:
-#         update_cache: yes
-#
-#     - name: Install JRE 17
-#       ansible.builtin.package:
-#         name: openjdk-17-jre-headless
-#         state: present
-#
-#     - name: Create app user
-#       ansible.builtin.user:
-#         name: app
-#         system: true
-#
-#     - name: Create /app dir
-#       ansible.builtin.file:
-#         path: /app
-#         state: directory
-#         owner: app
-#         group: app
-#         mode: "0755"
+- hosts: backend_host
+  become: true
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install JRE 17
+      ansible.builtin.package:
+        name: openjdk-17-jre-headless
+        state: present
+
+    - name: Create app user
+      ansible.builtin.user:
+        name: app
+        system: true
+
+    - name: Create /app dir
+      ansible.builtin.file:
+        path: /app
+        state: directory
+        owner: app
+        group: app
+        mode: "0755"

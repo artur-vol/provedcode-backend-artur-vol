@@ -1,16 +1,20 @@
----
-- name: Test simple playbook
-  hosts: all
+- hosts: backend
   become: true
-
   tasks:
-    - name: Ping all hosts
-      ansible.builtin.ping:
+    - name: Install JRE 17
+      ansible.builtin.package:
+        name: openjdk-17-jre-headless
+        state: present
 
-    - name: Show uptime
-      ansible.builtin.command: uptime
-      register: out
+    - name: Create app user
+      ansible.builtin.user:
+        name: app
+        system: true
 
-    - name: Print uptime
-      ansible.builtin.debug:
-        var: out.stdout
+    - name: Create /app dir
+      ansible.builtin.file:
+        path: /app
+        state: directory
+        owner: app
+        group: app
+        mode: "0755"

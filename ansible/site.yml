@@ -1,24 +1,84 @@
-- hosts: backend
+---
+- hosts: bastion
   become: true
   tasks:
-    - name: Update apt cache
-      ansible.builtin.apt:
-        update_cache: yes
+    - name: Enable IP forwarding (runtime)
+      ansible.posix.sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        state: present
+        reload: yes
 
-    - name: Install JRE 17
-      ansible.builtin.package:
-        name: openjdk-17-jre-headless
+    - name: Persist IP forwarding
+      ansible.builtin.lineinfile:
+        path: /etc/sysctl.conf
+        regexp: '^net.ipv4.ip_forward'
+        line: 'net.ipv4.ip_forward=1'
         state: present
 
-    - name: Create app user
-      ansible.builtin.user:
-        name: app
-        system: true
+    - name: Detect WAN interface if not provided
+      ansible.builtin.set_fact:
+        wan_if: "{{ wan_if | default(ansible_default_ipv4.interface) }}"
 
-    - name: Create /app dir
-      ansible.builtin.file:
-        path: /app
-        state: directory
-        owner: app
-        group: app
-        mode: "0755"
+    - name: Allow forwarding from LAN to WAN
+      ansible.posix.iptables:
+        chain: FORWARD
+        source: "{{ lan_cidr }}"
+        out_interface: "{{ wan_if }}"
+        jump: ACCEPT
+        state: present
+      notify: save iptables rules
+
+    - name: Allow established/related return traffic
+      ansible.posix.iptables:
+        chain: FORWARD
+        in_interface: "{{ wan_if }}"
+        ctstate: ESTABLISHED,RELATED
+        jump: ACCEPT
+        state: present
+      notify: save iptables rules
+
+    - name: Enable NAT masquerade on WAN
+      ansible.posix.iptables:
+        table: nat
+        chain: POSTROUTING
+        out_interface: "{{ wan_if }}"
+        jump: MASQUERADE
+        state: present
+      notify: save iptables rules
+
+    - name: Install netfilter-persistent
+      ansible.builtin.apt:
+        name: netfilter-persistent
+        state: present
+        update_cache: yes
+
+  handlers:
+    - name: save iptables rules
+      ansible.builtin.command: netfilter-persistent save
+      become: true
+
+# - hosts: backend
+#   become: true
+#   tasks:
+#     - name: Update apt cache
+#       ansible.builtin.apt:
+#         update_cache: yes
+#
+#     - name: Install JRE 17
+#       ansible.builtin.package:
+#         name: openjdk-17-jre-headless
+#         state: present
+#
+#     - name: Create app user
+#       ansible.builtin.user:
+#         name: app
+#         system: true
+#
+#     - name: Create /app dir
+#       ansible.builtin.file:
+#         path: /app
+#         state: directory
+#         owner: app
+#         group: app
+#         mode: "0755"

@@ -82,3 +82,17 @@
         owner: app
         group: app
         mode: "0755"
+
+    - name: Install awscli
+      ansible.builtin.package:
+        name: awscli
+        state: present
+
+    - name: Download app.jar from S3
+      ansible.builtin.shell: |
+        aws s3 cp s3://{{ bucket }}/backend/app.jar /app/app.jar --region {{ aws_region }}
+      args:
+        creates: /app/app.jar
+      environment:
+        AWS_ACCESS_KEY_ID: "{{ s3_access_key }}"
+        AWS_SECRET_ACCESS_KEY: "{{ s3_secret_key }}"

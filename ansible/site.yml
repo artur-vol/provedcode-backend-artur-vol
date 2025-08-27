@@ -21,7 +21,7 @@
         wan_if: "{{ wan_if | default(ansible_default_ipv4.interface) }}"
 
     - name: Allow forwarding from LAN to WAN
-      ansible.posix.iptables:
+      ansible.builtin.iptables:
         chain: FORWARD
         source: "{{ lan_cidr }}"
         out_interface: "{{ wan_if }}"

@@ -36,7 +36,7 @@ output "db_password" {
 
 output "db_url" {
   description = "Database connection URL for backend"
-  value       = module.database.db_url
+  value       = "${module.database.db_endpoint}/provedcode"
 }
 
 output "db_endpoint" {

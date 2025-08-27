@@ -1,0 +1,16 @@
+---
+- name: Test simple playbook
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Ping all hosts
+      ansible.builtin.ping:
+
+    - name: Show uptime
+      ansible.builtin.command: uptime
+      register: out
+
+    - name: Print uptime
+      ansible.builtin.debug:
+        var: out.stdout

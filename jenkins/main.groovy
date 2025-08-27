@@ -133,5 +133,13 @@ pipeline {
       }
     }
 
+    stage('Ansible: run playbook') {
+      steps {
+        dir('backend_ansible/ansible') {
+          sh 'ansible-playbook -i ${WORKSPACE}/inventory.ini site.yml -e ANSIBLE_NOCOLOR=True'
+        }
+      }
+    }
+
   }
 }

@@ -42,23 +42,23 @@ pipeline {
         }
       }
     }
-    //
-    // stage('Checkout Backend') {
-    //   steps {
-    //     dir('backend_app') {
-    //       git branch: 'main', url: 'https://github.com/artur-vol/provedcode-backend-artur-vol.git'
-    //     }
-    //   }
-    // }
-    //
-    // stage('Checkout Frontend') {
-    //   steps {
-    //     dir('frontend') {
-    //       git branch: 'main', url: 'https://github.com/artur-vol/provedcode-frontend-artur-vol.git'
-    //     }
-    //   }
-    // }
-    //
+
+    stage('Checkout Backend') {
+      steps {
+        dir('backend_app') {
+          git branch: 'main', url: 'https://github.com/artur-vol/provedcode-backend-artur-vol.git'
+        }
+      }
+    }
+
+    stage('Checkout Frontend') {
+      steps {
+        dir('frontend') {
+          git branch: 'main', url: 'https://github.com/artur-vol/provedcode-frontend-artur-vol.git'
+        }
+      }
+    }
+
     stage('Terraform') {
       steps {
         dir('backend_terraform/terraform') {
@@ -72,29 +72,61 @@ pipeline {
         stash name: 'tf_outputs', includes: 'backend_terraform/terraform/tf_output.json'
       }
     }
-    //
-    // stage('Build Backend') {
-    //   steps {
-    //     dir('backend_app') {
-    //       sh 'chmod +x ./mvnw'
-    //       sh './mvnw -DskipTests=false test'
-    //       sh './mvnw clean package -DskipTests'
-    //       archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-    //     }
-    //   }
-    // }
-    //
-    // stage('Build Frontend') {
-    //   steps {
-    //     dir('frontend') {
-    //     sh 'npm ci --no-audit --no-fund'
-    //       sh 'npm run build'
-    //       sh 'tar -cvf build.tar build/'
-    //       archiveArtifacts artifacts: 'build.tar', fingerprint: true
-    //     }
-    //   }
-    // }
-    //
+
+    stage('Build Backend') {
+      steps {
+        dir('backend_app') {
+          sh 'chmod +x ./mvnw'
+          sh './mvnw -DskipTests=false test'
+          sh './mvnw clean package -DskipTests'
+          archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+        }
+      }
+    }
+
+    stage('Upload Backend to S3') {
+      steps {
+        unstash 'tf_outputs'
+        script {
+          def tf     = readJSON file: "${env.WORKSPACE}/backend_terraform/terraform/tf_output.json"
+          def bucket_name = tf.bucket.value
+          sh """
+            aws s3 cp backend_app/target/*.jar s3://${bucket_name}/backend/app.jar --region ${AWS_DEFAULT_REGION}
+          """
+        }
+      }
+    }
+
+    stage('Build Frontend') {
+      steps {
+        unstash 'tf_outputs'
+        script {
+          def tf   = readJSON file: "${env.WORKSPACE}/backend_terraform/terraform/tf_output.json"
+          def edge = tf.edge_gateway_public_ip.value
+          dir('frontend') {
+            sh 'npm ci --no-audit --no-fund'
+            sh """
+              REACT_APP_BASE_URL="http://${edge}:8080" npm run build
+            """
+            sh 'tar -cvf build.tar build/'
+            archiveArtifacts artifacts: 'build.tar', fingerprint: true
+          }
+        }
+      }
+    }
+
+    stage('Upload Frontend to S3') {
+      steps {
+        unstash 'tf_outputs'
+        script {
+          def tf     = readJSON file: "${env.WORKSPACE}/backend_terraform/terraform/tf_output.json"
+          def bucket_name = tf.bucket.value
+          sh """
+            aws s3 cp frontend/build.tar s3://${bucket_name}/frontend/build.tar --region ${AWS_DEFAULT_REGION}
+          """
+        }
+      }
+    }
 
     stage('Prepare Ansible') {
       steps {
@@ -132,14 +164,14 @@ pipeline {
         }
       }
     }
-
-    stage('Ansible: run playbook') {
-      steps {
-        dir('backend_ansible/ansible') {
-          sh 'ansible-playbook -i ${WORKSPACE}/inventory.ini site.yml -e ANSIBLE_NOCOLOR=True'
-        }
-      }
-    }
-
+    //
+    // stage('Ansible: run playbook') {
+    //   steps {
+    //     dir('backend_ansible/ansible') {
+    //       sh 'ansible-playbook -i ${WORKSPACE}/inventory.ini site.yml -e ANSIBLE_NOCOLOR=True'
+    //     }
+    //   }
+    // }
+    //
   }
 }

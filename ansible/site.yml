@@ -1,0 +1,84 @@
+---
+- hosts: edge
+  become: true
+  tasks:
+    - name: Enable IP forwarding (runtime)
+      ansible.builtin.sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        state: present
+        reload: yes
+
+    - name: Persist IP forwarding
+      ansible.builtin.lineinfile:
+        path: /etc/sysctl.conf
+        regexp: '^net.ipv4.ip_forward'
+        line: 'net.ipv4.ip_forward=1'
+        state: present
+
+    - name: Detect WAN interface if not provided
+      ansible.builtin.set_fact:
+        wan_if: "{{ wan_if | default(ansible_default_ipv4.interface) }}"
+
+    - name: Allow forwarding from LAN to WAN
+      ansible.builtin.iptables:
+        chain: FORWARD
+        source: "{{ lan_cidr }}"
+        out_interface: "{{ wan_if }}"
+        jump: ACCEPT
+        state: present
+      notify: save iptables rules
+
+    - name: Allow established/related return traffic
+      ansible.builtin.iptables:
+        chain: FORWARD
+        in_interface: "{{ wan_if }}"
+        ctstate: ESTABLISHED,RELATED
+        jump: ACCEPT
+        state: present
+      notify: save iptables rules
+
+    - name: Enable NAT masquerade on WAN
+      ansible.builtin.iptables:
+        table: nat
+        chain: POSTROUTING
+        out_interface: "{{ wan_if }}"
+        jump: MASQUERADE
+        state: present
+      notify: save iptables rules
+
+    - name: Install netfilter-persistent
+      ansible.builtin.apt:
+        name: netfilter-persistent
+        state: present
+        update_cache: yes
+
+  handlers:
+    - name: save iptables rules
+      ansible.builtin.command: netfilter-persistent save
+      become: true
+
+# - hosts: backend
+#   become: true
+#   tasks:
+#     - name: Update apt cache
+#       ansible.builtin.apt:
+#         update_cache: yes
+#
+#     - name: Install JRE 17
+#       ansible.builtin.package:
+#         name: openjdk-17-jre-headless
+#         state: present
+#
+#     - name: Create app user
+#       ansible.builtin.user:
+#         name: app
+#         system: true
+#
+#     - name: Create /app dir
+#       ansible.builtin.file:
+#         path: /app
+#         state: directory
+#         owner: app
+#         group: app
+#         mode: "0755"

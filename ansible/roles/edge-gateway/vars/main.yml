@@ -1,4 +1,0 @@
-#SPDX-License-Identifier: MIT-0
----
-# vars file for edge-gateway
-lan_cidr: "10.0.2.0/24"

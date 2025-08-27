@@ -96,3 +96,52 @@
       environment:
         AWS_ACCESS_KEY_ID: "{{ s3_access_key }}"
         AWS_SECRET_ACCESS_KEY: "{{ s3_secret_key }}"
+
+    - name: Create /etc/provedcode dir
+      ansible.builtin.file:
+        path: /etc/provedcode
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Write backend env
+      ansible.builtin.copy:
+        dest: /etc/provedcode/backend.env
+        owner: root
+        group: root
+        mode: "0640"
+        content: |
+          SPRING_PROFILES_ACTIVE=prod
+          DB_URL={{ db_url }}
+          DB_LOGIN={{ db_login }}
+          DB_PASSWORD={{ db_password }}
+          S3_ACCESS_KEY={{ s3_access_key }}
+          S3_SECRET_KEY={{ s3_secret_key }}
+          S3_REGION={{ aws_region }}
+          BUCKET={{ bucket }}
+
+    - name: Install systemd unit
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/backend.service
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=Provedcode Backend
+          After=network.target
+
+          [Service]
+          User=app
+          WorkingDirectory=/app
+          EnvironmentFile=/etc/provedcode/backend.env
+          ExecStart=/usr/bin/java -jar /app/app.jar
+          Restart=always
+          RestartSec=5
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload and start service
+      ansible.builtin.shell: |
+        systemctl daemon-reload
+        systemctl enable --now backend

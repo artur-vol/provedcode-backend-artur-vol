@@ -121,8 +121,13 @@ pipeline {
         script {
           def tf     = readJSON file: "${env.WORKSPACE}/backend_terraform/terraform/tf_output.json"
           def bucket_name = tf.bucket.value
+          // sh """
+          //   aws s3 cp frontend/build.tar s3://${bucket_name}/frontend/build.tar --region ${AWS_DEFAULT_REGION}
+          // """
           sh """
-            aws s3 cp frontend/build.tar s3://${bucket_name}/frontend/build.tar --region ${AWS_DEFAULT_REGION}
+            aws s3 cp frontend/build.tar s3://${bucket_name}/frontend/build.tar \
+              --region ${AWS_DEFAULT_REGION} \
+              --cache-control "no-cache, max-age=0" --metadata-directive REPLACE
           """
         }
       }

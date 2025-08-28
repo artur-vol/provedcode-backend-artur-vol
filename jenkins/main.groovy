@@ -106,7 +106,7 @@ pipeline {
           dir('frontend') {
             sh 'npm ci --no-audit --no-fund'
             sh """
-              REACT_APP_BASE_URL="http://${edge}:8080" npm run build
+              REACT_APP_BASE_URL="http://${edge}" npm run build
             """
             sh 'tar -cvf build.tar build/'
             archiveArtifacts artifacts: 'build.tar', fingerprint: true

@@ -211,6 +211,11 @@
         state: present
         update_cache: yes
 
+    - name: Remove old build
+      ansible.builtin.file:
+        path: /var/www/provedcode
+        state: absent
+
     - name: Ensure web root
       ansible.builtin.file:
         path: "{{ web_root }}"

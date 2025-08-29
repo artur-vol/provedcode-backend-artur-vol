@@ -68,10 +68,11 @@
             listen 80;
 
             location /api/ {
-              proxy_pass http://{{ backend_ip }}:{{ backend_port | default(8080) }}/;
+              proxy_pass http://{{ backend_ip }}:{{ backend_port | default(8080) }};
               proxy_set_header Host $host;
               proxy_set_header X-Real-IP $remote_addr;
               proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header Authorization $http_authorization;
               proxy_redirect off;
             }
 
@@ -211,9 +212,21 @@
         state: present
         update_cache: yes
 
-    - name: Remove old build
+    - name: Remove old build archive
       ansible.builtin.file:
-        path: /var/www/provedcode
+        path: /tmp/build.tar
+        state: absent
+
+    - name: Download fresh build.tar from S3
+      ansible.builtin.shell: |
+        aws s3 cp s3://{{ bucket }}/frontend/build.tar /tmp/build.tar --region {{ aws_region }}
+      environment:
+        AWS_ACCESS_KEY_ID: "{{ s3_access_key }}"
+        AWS_SECRET_ACCESS_KEY: "{{ s3_secret_key }}"
+
+    - name: Remove old deployed build
+      ansible.builtin.file:
+        path: "{{ web_root }}"
         state: absent
 
     - name: Ensure web root
@@ -224,14 +237,6 @@
         group: www-data
         mode: "0755"
 
-    - name: Download build.tar from S3
-      ansible.builtin.shell: |
-        aws s3 cp s3://{{ bucket }}/frontend/build.tar /tmp/build.tar --region {{ aws_region }}
-      args: { creates: /tmp/build.tar }
-      environment:
-        AWS_ACCESS_KEY_ID: "{{ s3_access_key }}"
-        AWS_SECRET_ACCESS_KEY: "{{ s3_secret_key }}"
-
     - name: Extract build
       ansible.builtin.unarchive:
         src: /tmp/build.tar
@@ -239,6 +244,17 @@
         remote_src: true
         owner: www-data
         group: www-data
+
+    - name: Fix directory perms
+      ansible.builtin.shell: "find {{ web_root }} -type d -exec chmod 0755 {} +"
+
+    - name: Fix file perms
+      ansible.builtin.shell: "find {{ web_root }} -type f -exec chmod 0644 {} +"
+
+    - name: Verify no ':8080' in deployed files
+      ansible.builtin.shell: "grep -R -n ':8080' {{ web_root }} || true"
+      register: grep8080
+      changed_when: false
 
     - name: Nginx site
       ansible.builtin.copy:
@@ -249,6 +265,11 @@
             listen 80;
             root {{ web_root }}/build;
             index index.html;
+
+            location = /index.html {
+              add_header Cache-Control "no-cache, must-revalidate";
+            }
+
             location / {
               try_files $uri /index.html;
             }
@@ -259,24 +280,20 @@
         src: /etc/nginx/sites-available/provedcode_frontend.conf
         dest: /etc/nginx/sites-enabled/provedcode_frontend.conf
         state: link
-    
+
     - name: Remove default
       ansible.builtin.file:
         path: /etc/nginx/sites-enabled/default
         state: absent
 
-    - name: Change directory perms
-      ansible.builtin.shell: "find /var/www/provedcode -type d -exec chmod 0755 {} +"
-
-    - name: Change file perms
-      ansible.builtin.shell: "find /var/www/provedcode -type f -exec chmod 0644 {} +"
-
-    - name: Test and reload nginx
+    - name: Test nginx config
       ansible.builtin.shell: nginx -t
       register: nt
       changed_when: false
       failed_when: nt.rc != 0
-    - ansible.builtin.systemd:
+
+    - name: Reload nginx
+      ansible.builtin.systemd:
         name: nginx
-        state: restarted
+        state: reloaded
         enabled: true

@@ -152,31 +152,60 @@ pipeline {
             '''
 
             def tf = readJSON file: "${env.WORKSPACE}/backend_terraform/terraform/tf_output.json"
-            def bastionIp  = tf.edge_gateway_public_ip.value
-            def backendIp  = tf.backend_private_ip.value
-            def frontendIp = tf.frontend_private_ip.value
+
+            def bastionIp   = tf.edge_gateway_public_ip.value
+            def backendIp   = tf.backend_private_ip.value
+            def frontendIp  = tf.frontend_private_ip.value
+            def bucketName  = tf.bucket.value
+            def backendPort = (tf.backend_port  && tf.backend_port.value)  ? tf.backend_port.value  : '8080'
+            def frontendPort= (tf.frontend_port && tf.frontend_port.value) ? tf.frontend_port.value : '80'
+            def lanCidr     = (tf.private_subnet_cidr && tf.private_subnet_cidr.value) ? tf.private_subnet_cidr.value : ''
 
             def inv = """\
-    bastion ansible_host=${bastionIp} ansible_user=ubuntu ansible_ssh_private_key_file=${WORKSPACE}/.ssh/edge_gateway_key.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+[edge]
+edge ansible_host=${bastionIp} ansible_user=ubuntu ansible_ssh_private_key_file=${WORKSPACE}/.ssh/edge_gateway_key.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 
-    backend ansible_host=${backendIp} ansible_user=ubuntu ansible_ssh_private_key_file=${WORKSPACE}/.ssh/backend_key.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand="ssh -i ${WORKSPACE}/.ssh/edge_gateway_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p -q ubuntu@${bastionIp}"'
+[backend_host]
+backend_host ansible_host=${backendIp} ansible_user=ubuntu ansible_ssh_private_key_file=${WORKSPACE}/.ssh/backend_key.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand="ssh -i ${WORKSPACE}/.ssh/edge_gateway_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p -q ubuntu@${bastionIp}"'
 
-    frontend ansible_host=${frontendIp} ansible_user=ubuntu ansible_ssh_private_key_file=${WORKSPACE}/.ssh/frontend_key.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand="ssh -i ${WORKSPACE}/.ssh/edge_gateway_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p -q ubuntu@${bastionIp}"'
-    """
+[frontend_host]
+frontend_host ansible_host=${frontendIp} ansible_user=ubuntu ansible_ssh_private_key_file=${WORKSPACE}/.ssh/frontend_key.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand="ssh -i ${WORKSPACE}/.ssh/edge_gateway_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p -q ubuntu@${bastionIp}"'
+"""
             writeFile file: "${env.WORKSPACE}/inventory.ini", text: inv
-            sh 'ansible all -i ${WORKSPACE}/inventory.ini -m ping -o -e ANSIBLE_NOCOLOR=True'
+
+            def extra = [
+              aws_region    : env.AWS_DEFAULT_REGION,
+              bucket        : bucketName,
+              backend_ip    : backendIp,
+              frontend_ip   : frontendIp,
+              backend_port  : backendPort,
+              frontend_port : frontendPort,
+              lan_cidr      : lanCidr,
+              s3_access_key : env.AWS_ACCESS_KEY_ID,
+              s3_secret_key : env.AWS_SECRET_ACCESS_KEY,
+              db_login      : env.TF_VAR_db_username,
+              db_password   : env.TF_VAR_db_password,
+              db_url        : (tf.db_url && tf.db_url.value) ? tf.db_url.value : ''
+            ]
+            writeFile file: "${env.WORKSPACE}/ansible-extra-vars.json", text: groovy.json.JsonOutput.toJson(extra)
+
+            sh 'ANSIBLE_NOCOLOR=True ANSIBLE_HOST_KEY_CHECKING=False ansible all -i ${WORKSPACE}/inventory.ini -m ping -o'
           }
         }
       }
     }
-    //
-    // stage('Ansible: run playbook') {
-    //   steps {
-    //     dir('backend_ansible/ansible') {
-    //       sh 'ansible-playbook -i ${WORKSPACE}/inventory.ini site.yml -e ANSIBLE_NOCOLOR=True'
-    //     }
-    //   }
-    // }
-    //
+
+    stage('Ansible: run playbook') {
+      steps {
+        dir('backend_ansible/ansible') {
+          sh '''
+            ANSIBLE_NOCOLOR=True ANSIBLE_HOST_KEY_CHECKING=False \
+            ansible-playbook -i "${WORKSPACE}/inventory.ini" site.yml \
+              --extra-vars "@${WORKSPACE}/ansible-extra-vars.json"
+          '''
+        }
+      }
+    }
+
   }
 }
